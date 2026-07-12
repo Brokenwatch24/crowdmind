@@ -19,7 +19,7 @@ import { getFollowUpReply } from '../src/main/llm/useCases'
 import { createEtapas, getFunnelResults } from '../src/main/db/repo/funnel'
 import { runFunnelTest } from '../src/main/engine/funnelEngine'
 import { createComparacion, computeComparison } from '../src/main/db/repo/comparison'
-import { generarReporteNarrativoHtml, generarReporteNarrativoMarkdown } from '../src/main/report/narrativeReport'
+import { generarReporteCompletoHtml, generarReporteNarrativoHtml, generarReporteNarrativoMarkdown } from '../src/main/report/narrativeReport'
 import { parseCsvToPersonaDrafts } from '../src/main/csv/csvImport'
 import { buildMarketplaceTemplate, parseMarketplaceTemplate, listBundledTemplates, fetchRemoteTemplates } from '../src/main/marketplace/marketplace'
 import { seedDemoWorkspace } from '../src/main/demo/seedDemo'
@@ -185,6 +185,9 @@ async function main() {
   const reportMd = generarReporteNarrativoMarkdown(test.id)
   assert(reportMd && reportMd.startsWith('# Reporte') && reportMd.includes('## Recomendaciones'), 'markdown report should be well-formed')
   console.log(`[ok] markdown report generated — ${reportMd!.length} characters`)
+  const fullReportHtml = generarReporteCompletoHtml(test.id)
+  assert(fullReportHtml && fullReportHtml.includes('Detalle por persona del panel'), 'full report should include persona detail table')
+  console.log(`[ok] full report generated — ${fullReportHtml!.length} characters of HTML`)
 
   const csvPath = path.join(os.tmpdir(), `crowdmind-smoketest-${Date.now()}.csv`)
   fs.writeFileSync(
@@ -213,7 +216,7 @@ async function main() {
   console.log(`[ok] marketplace export/import works — template with ${roundTripped.personas.length} personas round-tripped`)
 
   const bundledTemplates = listBundledTemplates()
-  assert(bundledTemplates.length >= 4, `expected at least 4 bundled templates, got ${bundledTemplates.length}`)
+  assert(bundledTemplates.length >= 6, `expected at least 6 bundled templates, got ${bundledTemplates.length}`)
   for (const b of bundledTemplates) {
     assert(b.template.personas.length > 0, `bundled template "${b.fileName}" has no personas`)
   }

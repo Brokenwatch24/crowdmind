@@ -14,6 +14,7 @@ interface RunFunnelArgs {
   etapas: EtapaFunnel[]
   modoInteraccion: ModoInteraccion
   scorecardCriteria?: string[]
+  responseLanguage?: 'es' | 'en'
   resolveCallForPersona: (persona: Persona) => ProviderCall
 }
 
@@ -49,7 +50,7 @@ function persistStageResult(
 
 /** Individual mode: each persona runs the full stage sequence independently and in parallel, stopping at its own drop-off point. */
 async function runFunnelIndividual(args: RunFunnelArgs): Promise<void> {
-  const { testId, personas, etapas, resolveCallForPersona, scorecardCriteria = [] } = args
+  const { testId, personas, etapas, resolveCallForPersona, scorecardCriteria = [], responseLanguage = 'es' } = args
 
   await runWithConcurrencyLimit(personas, CONCURRENCY, async (persona) => {
     const historialPropio: EtapaPropiaHistorial[] = []
@@ -57,7 +58,7 @@ async function runFunnelIndividual(args: RunFunnelArgs): Promise<void> {
 
     for (const etapa of etapas) {
       try {
-        const respuesta = await getFunnelStageResponse(call, persona, etapa, historialPropio, undefined, scorecardCriteria)
+        const respuesta = await getFunnelStageResponse(call, persona, etapa, historialPropio, undefined, scorecardCriteria, responseLanguage)
         persistStageResult(testId, persona, etapa, call, respuesta)
         historialPropio.push({ tituloEtapa: etapa.titulo, opinion: respuesta.opinionTexto, avanzo: respuesta.avanzoASiguienteEtapa })
         if (!respuesta.avanzoASiguienteEtapa) break
@@ -82,7 +83,7 @@ async function runFunnelIndividual(args: RunFunnelArgs): Promise<void> {
  * the first respondent doesn't always anchor the rest of the group.
  */
 async function runFunnelFocusGroup(args: RunFunnelArgs): Promise<void> {
-  const { testId, personas, etapas, resolveCallForPersona, scorecardCriteria = [] } = args
+  const { testId, personas, etapas, resolveCallForPersona, scorecardCriteria = [], responseLanguage = 'es' } = args
   const historialPorPersona = new Map<string, EtapaPropiaHistorial[]>(personas.map((p) => [p.id, []]))
   let activos = [...personas]
 
@@ -102,7 +103,7 @@ async function runFunnelFocusGroup(args: RunFunnelArgs): Promise<void> {
       const peerSummary = peerResponsesSoFar.length ? peerResponsesSoFar.join('\n') : undefined
 
       try {
-        const respuesta = await getFunnelStageResponse(call, persona, etapa, historialPropio, peerSummary, scorecardCriteria)
+        const respuesta = await getFunnelStageResponse(call, persona, etapa, historialPropio, peerSummary, scorecardCriteria, responseLanguage)
         persistStageResult(testId, persona, etapa, call, respuesta)
         historialPropio.push({ tituloEtapa: etapa.titulo, opinion: respuesta.opinionTexto, avanzo: respuesta.avanzoASiguienteEtapa })
         peerResponsesSoFar.push(`${persona.nombre} dijo: "${respuesta.opinionTexto}" (${respuesta.avanzoASiguienteEtapa ? 'avanzó' : 'abandonó'})`)

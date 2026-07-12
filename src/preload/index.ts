@@ -100,11 +100,13 @@ const api = {
       attachments?: EstimuloAttachment[]
       provider: ProviderId
       model?: string
+      responseLanguage?: 'es' | 'en'
       personaIds?: string[]
       scorecardCriteria?: string[]
     }): Promise<TestResultSummary> => ipcRenderer.invoke(IPC.testsRunSimple, input),
     getNarrativeReport: (testId: string): Promise<string | null> => ipcRenderer.invoke(IPC.testsGetNarrativeReport, testId),
-    exportPdf: (testId: string): Promise<{ success: boolean; filePath?: string }> => ipcRenderer.invoke(IPC.testsExportPdf, testId),
+    exportPdf: (testId: string, variant: 'summary' | 'full' = 'summary'): Promise<{ success: boolean; filePath?: string }> =>
+      ipcRenderer.invoke(IPC.testsExportPdf, testId, variant),
     exportJson: (testId: string): Promise<{ success: boolean; filePath?: string }> => ipcRenderer.invoke(IPC.testsExportJson, testId),
     exportMarkdown: (testId: string): Promise<{ success: boolean; filePath?: string }> => ipcRenderer.invoke(IPC.testsExportMarkdown, testId)
   },
@@ -129,6 +131,7 @@ const api = {
       pregunta: string
       provider: ProviderId
       model?: string
+      responseLanguage?: 'es' | 'en'
     }): Promise<FollowUpResultSummary> => ipcRenderer.invoke(IPC.followUpsRun, input)
   },
   funnel: {
@@ -141,6 +144,7 @@ const api = {
       etapas: EtapaFunnelDraft[]
       provider: ProviderId
       model?: string
+      responseLanguage?: 'es' | 'en'
       personaIds?: string[]
       scorecardCriteria?: string[]
     }): Promise<FunnelResultSummary> => ipcRenderer.invoke(IPC.funnelRun, input),
@@ -185,6 +189,7 @@ const api = {
       mensaje: string
       provider: ProviderId
       model?: string
+      responseLanguage?: 'es' | 'en'
     }): Promise<{ userMsg: ChatMensaje; personaMsg: ChatMensaje }> => ipcRenderer.invoke(IPC.chatSend, input)
   },
   settings: {

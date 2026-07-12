@@ -25,6 +25,7 @@ export function registerFollowUpHandlers(): void {
         pregunta: string
         provider: ProviderId
         model?: string
+        responseLanguage?: 'es' | 'en'
       }
     ) => {
       const originalRespuestas = testsRepo.listRespuestasForTest(input.testId)
@@ -37,7 +38,7 @@ export function registerFollowUpHandlers(): void {
         const call = resolveCallForPersona(persona, input.workspaceId, input.provider, input.model)
         const opinionOriginal = originalByPersona.get(persona.id) ?? '(sin opinión previa registrada)'
         try {
-          const respuesta = await getFollowUpReply(call, persona, opinionOriginal, input.pregunta)
+          const respuesta = await getFollowUpReply(call, persona, opinionOriginal, input.pregunta, input.responseLanguage ?? 'es')
           followUpsRepo.saveFollowUpRespuesta(followUp.id, persona.id, respuesta)
         } catch (err) {
           followUpsRepo.saveFollowUpRespuesta(

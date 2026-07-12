@@ -1,6 +1,6 @@
 {
   "name": "crowdmind",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Local-first desktop app for simulating AI persona panels and testing stimuli against them.",
   "main": "./out/main/index.js",
   "author": "Crowdmind contributors",

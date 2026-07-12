@@ -31,6 +31,7 @@ export function TestConfigPage() {
   const navigate = useNavigate()
   const provider = useAppStore((s) => s.currentProvider)
   const model = useAppStore((s) => s.currentModel)
+  const language = useAppStore((s) => s.language)
   const [personas, setPersonas] = useState<Persona[]>([])
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [nombre, setNombre] = useState('')
@@ -99,6 +100,7 @@ export function TestConfigPage() {
           attachments,
           provider,
           model: model ?? undefined,
+          responseLanguage: language,
           personaIds: Array.from(selected),
           scorecardCriteria
         })
@@ -112,6 +114,7 @@ export function TestConfigPage() {
           etapas,
           provider,
           model: model ?? undefined,
+          responseLanguage: language,
           personaIds: Array.from(selected),
           scorecardCriteria
         })
@@ -124,7 +127,12 @@ export function TestConfigPage() {
 
   return (
     <div className="p-8">
-      <PageHeader eyebrow={t('testConfig.eyebrow')} title={t('testConfig.title')} />
+      <PageHeader
+        eyebrow={t('testConfig.eyebrow')}
+        title={t('testConfig.title')}
+        backTo={`/w/${workspaceId}/panels/${panelId}`}
+        backLabel={t('nav.backToPanel')}
+      />
 
       <div className="mb-5 flex flex-wrap gap-2">
         <div className="flex gap-[3px] rounded-lg border border-border bg-surface p-[3px]">

@@ -132,6 +132,135 @@ export function generarReporteNarrativoHtml(testId: string): string | null {
 </body></html>`
 }
 
+export function generarReporteCompletoHtml(testId: string): string | null {
+  const data = gatherReportData(testId)
+  if (!data) return null
+  const {
+    test,
+    respuestas,
+    scorePromedio,
+    distribucion,
+    scorecardPromedios,
+    temas,
+    nivel,
+    topObjeciones,
+    recomendaciones
+  } = data
+  const sorted = [...respuestas].sort((a, b) => b.scoreSatisfaccion - a.scoreSatisfaccion)
+  const voces = [sorted[0], sorted[Math.floor(sorted.length / 2)], sorted[sorted.length - 1]].filter(Boolean)
+  const scorecardEntries = Object.entries(scorecardPromedios)
+
+  return `<!doctype html>
+<html lang="es"><head><meta charset="utf-8" />
+<style>
+  @page { margin: 26mm 18mm; }
+  body { font-family: Arial, Helvetica, sans-serif; color: #15171a; max-width: 820px; margin: 0 auto; line-height: 1.45; }
+  h1 { font-size: 25px; line-height: 1.2; margin: 0 0 8px; }
+  h2 { font-size: 17px; margin: 30px 0 10px; padding-bottom: 7px; border-bottom: 1px solid #d9dde3; }
+  h3 { font-size: 13px; margin: 14px 0 6px; }
+  p, li, td, th { font-size: 12.5px; }
+  .subtitle { color: #5b616b; font-size: 12px; margin-bottom: 24px; }
+  .stimulus { background: #f6f7f9; border: 1px solid #e2e5ea; border-radius: 10px; padding: 14px 16px; }
+  .score-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 16px 0 8px; }
+  .score { border: 1px solid #dfe3e8; border-radius: 10px; padding: 12px; background: #fbfbfc; }
+  .score b { display: block; font-size: 22px; margin-bottom: 4px; }
+  .score span { color: #626975; font-size: 10.5px; text-transform: uppercase; letter-spacing: .04em; }
+  .theme { margin: 12px 0; page-break-inside: avoid; }
+  .theme-title { font-weight: 700; }
+  .quote { color: #4f5661; margin: 4px 0 0 12px; font-style: italic; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .voice { border: 1px solid #e0e4ea; border-radius: 10px; padding: 12px; margin: 10px 0; page-break-inside: avoid; }
+  .voice-head { display: flex; justify-content: space-between; gap: 10px; font-weight: 700; }
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  th { text-align: left; background: #f1f3f6; }
+  th, td { border: 1px solid #e0e4ea; padding: 7px 8px; }
+  .small { color: #68707d; font-size: 11px; }
+</style></head>
+<body>
+  <h1>Reporte de validacion: ${escapeHtml(test.nombre)}</h1>
+  <div class="subtitle">Panel sintetico de ${respuestas.length} personas - generado el ${fmtDate(Date.now())} - confianza ${nivel}${test.indiceConfianza !== null ? ` (${test.indiceConfianza}/100)` : ''}</div>
+
+  <h2>1. Estimulo evaluado</h2>
+  <div class="stimulus">${escapeHtml(test.estimuloContenido || 'Estimulo visual o adjunto sin texto descriptivo.')}</div>
+  <div class="score-grid">
+    <div class="score"><b>${scorePromedio.toFixed(1)}/10</b><span>Satisfaccion promedio</span></div>
+    ${
+      scorecardEntries.length > 0
+        ? scorecardEntries
+            .slice(0, 3)
+            .map(([k, v]) => `<div class="score"><b>${v.toFixed(1)}/10</b><span>${escapeHtml(k)}</span></div>`)
+            .join('')
+        : `<div class="score"><b>${distribucion.positivo}</b><span>Positivas</span></div><div class="score"><b>${distribucion.neutro}</b><span>Neutras</span></div><div class="score"><b>${distribucion.negativo}</b><span>Negativas</span></div>`
+    }
+  </div>
+  <p class="small">Basado en ${respuestas.length} entrevistas sinteticas individuales completadas.</p>
+
+  <h2>2. Sentimiento general y scorecard</h2>
+  <p>De las ${respuestas.length} personas, ${distribucion.positivo} tuvieron una reaccion positiva, ${distribucion.neutro} neutra y ${distribucion.negativo} negativa.</p>
+  ${test.resumenEjecutivo ? `<p>${escapeHtml(test.resumenEjecutivo)}</p>` : ''}
+  ${
+    scorecardEntries.length > 0
+      ? `<p>${scorecardEntries.map(([k, v]) => `${escapeHtml(k)}: ${v.toFixed(1)}/10`).join(' - ')}</p>`
+      : ''
+  }
+
+  <h2>3. Temas recurrentes</h2>
+  <p>Cantidad de personas que mencionaron cada tema en su opinion.</p>
+  ${
+    temas.length > 0
+      ? temas
+          .map(
+            (t) => `<div class="theme"><div class="theme-title">${escapeHtml(t.nombreTema)} - ${t.cantidadMenciones} menciones</div>${t.personasRepresentativas
+              .slice(0, 2)
+              .map((q) => `<div class="quote">"${escapeHtml(q.quote)}"</div>`)
+              .join('')}</div>`
+          )
+          .join('')
+      : '<p>No hay temas extraidos para este test.</p>'
+  }
+
+  <h2>4. Principales objeciones y aspectos positivos</h2>
+  <div class="cols">
+    <div>
+      <h3>Objeciones mas frecuentes</h3>
+      <ul>${(topObjeciones.length ? topObjeciones : [['No se detectaron objeciones recurrentes.', 0] as [string, number]])
+        .map(([o, count]) => `<li>${escapeHtml(o)}${count ? ` (${count} menciones)` : ''}</li>`)
+        .join('')}</ul>
+    </div>
+    <div>
+      <h3>Aspectos positivos mas valorados</h3>
+      <ul>${[...new Set(respuestas.flatMap((r) => r.aspectosPositivos))]
+        .slice(0, 6)
+        .map((a) => `<li>${escapeHtml(a)}</li>`)
+        .join('')}</ul>
+    </div>
+  </div>
+
+  <h2>5. Voces destacadas del panel</h2>
+  ${voces
+    .map(
+      (r) => `<div class="voice"><div class="voice-head"><span>${escapeHtml(r.persona.nombre)}</span><span>${r.scoreSatisfaccion}/10</span></div><div class="small">${escapeHtml(r.persona.ocupacion)}, ${escapeHtml(r.persona.ciudad)}</div><p>${escapeHtml(r.opinionTexto)}</p></div>`
+    )
+    .join('')}
+
+  <h2>6. Detalle por persona del panel</h2>
+  <table>
+    <thead><tr><th>Persona</th><th>Rol</th><th>Ciudad</th><th>Score</th></tr></thead>
+    <tbody>${sorted
+      .map((r) => `<tr><td>${escapeHtml(r.persona.nombre)}</td><td>${escapeHtml(r.persona.ocupacion)}</td><td>${escapeHtml(r.persona.ciudad)}</td><td>${r.scoreSatisfaccion}</td></tr>`)
+      .join('')}</tbody>
+  </table>
+
+  <h2>7. Conclusiones y recomendaciones</h2>
+  <ul>${recomendaciones.map((r) => `<li>${escapeHtml(r)}</li>`).join('')}</ul>
+  ${
+    test.disclaimers.length > 0
+      ? `<h3>Limitaciones</h3><ul>${test.disclaimers.map((d) => `<li>${escapeHtml(d)}</li>`).join('')}</ul>`
+      : ''
+  }
+</body></html>`
+}
+
 /** Same content as the HTML report, as plain Markdown — handy for pasting into Notion/docs/PRs. */
 export function generarReporteNarrativoMarkdown(testId: string): string | null {
   const data = gatherReportData(testId)

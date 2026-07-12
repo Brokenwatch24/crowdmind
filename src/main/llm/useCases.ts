@@ -52,7 +52,9 @@ import {
   temasSystemPrompt,
   temasUserPrompt,
   funnelStageUserPromptWithScorecard,
-  type EtapaPropiaHistorial
+  responseLanguageInstruction,
+  type EtapaPropiaHistorial,
+  type ResponseLanguage
 } from './promptTemplates'
 
 export interface ProviderCall {
@@ -156,7 +158,8 @@ export async function getPersonaResponseToStimulus(
   estimulo: string,
   imageDataUri?: string,
   scorecardCriteria: string[] = [],
-  attachments: EstimuloAttachment[] = []
+  attachments: EstimuloAttachment[] = [],
+  responseLanguage: ResponseLanguage = 'es'
 ): Promise<LocalRespuesta> {
   const hasAttachments = hasVisualContext(attachments, imageDataUri)
   if (call.provider === 'local') {
@@ -165,7 +168,7 @@ export async function getPersonaResponseToStimulus(
   const result = await providerRegistry[call.provider].chatJson({
     apiKey: call.apiKey,
     model: call.model,
-    system: personaSystemPrompt(persona),
+    system: `${personaSystemPrompt(persona)} ${responseLanguageInstruction(responseLanguage)}`,
     user: testStimulusUserPromptWithScorecard(estimulo, hasAttachments, scorecardCriteria),
     schema: testResponseSchema,
     shapeHint: TEST_RESPONSE_SHAPE_HINT,
@@ -179,7 +182,8 @@ export async function getPersonaChatReply(
   call: ProviderCall,
   persona: Persona,
   historia: ChatMensaje[],
-  mensajeNuevo: string
+  mensajeNuevo: string,
+  responseLanguage: ResponseLanguage = 'es'
 ): Promise<string> {
   if (call.provider === 'local') {
     return chatReplyLocal(persona, historia, mensajeNuevo)
@@ -187,7 +191,7 @@ export async function getPersonaChatReply(
   const result = await providerRegistry[call.provider].chatJson({
     apiKey: call.apiKey,
     model: call.model,
-    system: personaSystemPrompt(persona),
+    system: `${personaSystemPrompt(persona)} ${responseLanguageInstruction(responseLanguage)}`,
     user: chatUserPrompt(historia, mensajeNuevo),
     schema: chatReplySchema,
     shapeHint: CHAT_REPLY_SHAPE_HINT
@@ -199,7 +203,8 @@ export async function getFollowUpReply(
   call: ProviderCall,
   persona: Persona,
   opinionOriginal: string,
-  pregunta: string
+  pregunta: string,
+  responseLanguage: ResponseLanguage = 'es'
 ): Promise<string> {
   if (call.provider === 'local') {
     return followUpReplyLocal(persona, opinionOriginal, pregunta)
@@ -207,7 +212,7 @@ export async function getFollowUpReply(
   const result = await providerRegistry[call.provider].chatJson({
     apiKey: call.apiKey,
     model: call.model,
-    system: personaSystemPrompt(persona),
+    system: `${personaSystemPrompt(persona)} ${responseLanguageInstruction(responseLanguage)}`,
     user: followUpUserPrompt(opinionOriginal, pregunta),
     schema: chatReplySchema,
     shapeHint: CHAT_REPLY_SHAPE_HINT
@@ -221,7 +226,8 @@ export async function getFunnelStageResponse(
   etapa: EtapaFunnel,
   historialPropio: EtapaPropiaHistorial[],
   peerSummary?: string,
-  scorecardCriteria: string[] = []
+  scorecardCriteria: string[] = [],
+  responseLanguage: ResponseLanguage = 'es'
 ): Promise<LocalFunnelRespuesta> {
   const attachments = etapa.estimuloMetadata.attachments ?? []
   if (call.provider === 'local') {
@@ -230,7 +236,7 @@ export async function getFunnelStageResponse(
   const result = await providerRegistry[call.provider].chatJson({
     apiKey: call.apiKey,
     model: call.model,
-    system: personaSystemPrompt(persona),
+    system: `${personaSystemPrompt(persona)} ${responseLanguageInstruction(responseLanguage)}`,
     user: funnelStageUserPromptWithScorecard(etapa, historialPropio, peerSummary, scorecardCriteria),
     schema: funnelStageResponseSchema,
     shapeHint: FUNNEL_STAGE_RESPONSE_SHAPE_HINT,

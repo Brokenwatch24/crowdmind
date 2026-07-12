@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Send, Trash2 } from 'lucide-react'
 import { api } from '@renderer/lib/api'
 import { useAppStore } from '@renderer/store/useAppStore'
@@ -18,9 +18,11 @@ import { useT } from '@renderer/i18n/useT'
 export function PersonaDetailPage() {
   const t = useT()
   const { workspaceId, panelId, personaId } = useParams<{ workspaceId: string; panelId: string; personaId: string }>()
+  const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const provider = useAppStore((s) => s.currentProvider)
   const model = useAppStore((s) => s.currentModel)
+  const language = useAppStore((s) => s.language)
   const [persona, setPersona] = useState<Persona | null>(null)
   const [mensajes, setMensajes] = useState<ChatMensaje[]>([])
   const [chatInput, setChatInput] = useState('')
@@ -56,7 +58,8 @@ export function PersonaDetailPage() {
         workspaceId,
         mensaje: text,
         provider,
-        model: model ?? undefined
+        model: model ?? undefined,
+        responseLanguage: language
       })
       setMensajes((prev) => [...prev, userMsg, personaMsg])
     } finally {
@@ -120,7 +123,7 @@ export function PersonaDetailPage() {
         </Dialog>
       </div>
 
-      <Tabs defaultValue="perfil">
+      <Tabs defaultValue={searchParams.get('tab') === 'chat' ? 'chat' : 'perfil'}>
         <TabsList>
           <TabsTrigger value="perfil">{t('personaDetail.tabProfile')}</TabsTrigger>
           <TabsTrigger value="chat">{t('personaDetail.tabChat')}</TabsTrigger>

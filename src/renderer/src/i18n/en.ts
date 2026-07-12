@@ -9,6 +9,7 @@ export const en: Record<keyof typeof es, string> = {
   'nav.comparar': 'Compare',
   'nav.notes': 'Notes',
   'nav.ajustes': 'Settings',
+  'nav.backToPanel': 'Back to panel',
   'shell.tagline': 'Crowdmind',
 
   // Workspaces
@@ -242,6 +243,8 @@ export const en: Record<keyof typeof es, string> = {
   'testResults.aiBadge': 'AI',
   'testResults.title': 'Results — "{{name}}"',
   'testResults.viewSwarm': 'View swarm',
+  'testResults.viewProfile': 'View profile',
+  'testResults.chatWithPersona': 'Chat',
   'testResults.scorePromedio': 'AVERAGE SCORE',
   'testResults.respuestas': 'RESPONSES',
   'testResults.distribucion': 'DISTRIBUTION',
@@ -283,6 +286,8 @@ export const en: Record<keyof typeof es, string> = {
   'export.pdfTitle': 'Narrative report (PDF)',
   'export.pdfDesc': 'Methodology, findings, recommendations and limitations in a ready-to-share document.',
   'export.pdfDownload': 'Download PDF',
+  'export.pdfSummary': 'Summary PDF',
+  'export.pdfFull': 'Full report',
   'export.exporting': 'Exporting…',
   'export.generating': 'Generating…',
   'export.savedAt': 'Saved to: {{path}}',
@@ -333,6 +338,15 @@ export const en: Record<keyof typeof es, string> = {
   'swarm.positive': 'positive',
   'swarm.neutral': 'neutral',
   'swarm.negative': 'negative',
+
+  // Continuation
+  'continuation.title': 'Test continuation',
+  'continuation.hint': 'Select personas in the swarm or ask the full panel as a roundtable.',
+  'continuation.selectAll': 'Select all',
+  'continuation.roundtable': 'Roundtable / focus group',
+  'continuation.selectedTarget': '{{count}} personas selected',
+  'continuation.allTarget': 'Full panel ({{count}})',
+  'continuation.askTarget': 'Ask {{count}}',
 
   // Comparison
   'comparison.eyebrow': 'COMPARISON',

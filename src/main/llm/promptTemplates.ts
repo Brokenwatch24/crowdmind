@@ -1,5 +1,13 @@
 import type { ChatMensaje, EtapaFunnel, Persona, RespuestaConPersona } from '@shared/types'
 
+export type ResponseLanguage = 'es' | 'en'
+
+export function responseLanguageInstruction(language: ResponseLanguage = 'es'): string {
+  return language === 'en'
+    ? 'Answer in English unless the researcher explicitly asks for another language.'
+    : 'Responde en español salvo que el investigador pida explicitamente otro idioma.'
+}
+
 export function personaGenSystemPrompt(): string {
   return [
     'Eres un generador de personas sintéticas para investigación de mercado.',

@@ -7,6 +7,7 @@ export const es = {
   'nav.comparar': 'Comparar',
   'nav.notes': 'Notas',
   'nav.ajustes': 'Ajustes',
+  'nav.backToPanel': 'Volver al panel',
   'shell.tagline': 'Crowdmind',
 
   // Workspaces
@@ -240,6 +241,8 @@ export const es = {
   'testResults.aiBadge': 'IA',
   'testResults.title': 'Resultados — "{{name}}"',
   'testResults.viewSwarm': 'Ver enjambre',
+  'testResults.viewProfile': 'Ver perfil',
+  'testResults.chatWithPersona': 'Chatear',
   'testResults.scorePromedio': 'SCORE PROMEDIO',
   'testResults.respuestas': 'RESPUESTAS',
   'testResults.distribucion': 'DISTRIBUCIÓN',
@@ -281,6 +284,8 @@ export const es = {
   'export.pdfTitle': 'Reporte narrativo (PDF)',
   'export.pdfDesc': 'Metodología, hallazgos, recomendaciones y limitaciones en un documento listo para compartir.',
   'export.pdfDownload': 'Descargar PDF',
+  'export.pdfSummary': 'PDF resumido',
+  'export.pdfFull': 'Informe completo',
   'export.exporting': 'Exportando…',
   'export.generating': 'Generando…',
   'export.savedAt': 'Guardado en: {{path}}',
@@ -331,6 +336,15 @@ export const es = {
   'swarm.positive': 'positivo',
   'swarm.neutral': 'neutro',
   'swarm.negative': 'negativo',
+
+  // Continuation
+  'continuation.title': 'Continuacion del test',
+  'continuation.hint': 'Selecciona personas en el enjambre o pregunta a todo el panel como mesa redonda.',
+  'continuation.selectAll': 'Seleccionar todos',
+  'continuation.roundtable': 'Mesa redonda / focus group',
+  'continuation.selectedTarget': '{{count}} personas seleccionadas',
+  'continuation.allTarget': 'Todo el panel ({{count}})',
+  'continuation.askTarget': 'Preguntar a {{count}}',
 
   // Comparison
   'comparison.eyebrow': 'COMPARACIÓN',

@@ -9,10 +9,10 @@ import { useT } from '@renderer/i18n/useT'
 export function ExportDialog({ testId }: { testId: string }) {
   const [open, setOpen] = useState(false)
   const [status, setStatus] = useState<string | null>(null)
-  const [busy, setBusy] = useState<'pdf' | 'json' | 'markdown' | null>(null)
+  const [busy, setBusy] = useState<'pdf-summary' | 'pdf-full' | 'json' | 'markdown' | null>(null)
   const t = useT()
 
-  async function run(kind: 'pdf' | 'json' | 'markdown', action: () => Promise<{ success: boolean; filePath?: string }>) {
+  async function run(kind: 'pdf-summary' | 'pdf-full' | 'json' | 'markdown', action: () => Promise<{ success: boolean; filePath?: string }>) {
     setBusy(kind)
     setStatus(null)
     try {
@@ -61,9 +61,14 @@ export function ExportDialog({ testId }: { testId: string }) {
               <FileText size={15} className="text-text-dim" /> {t('export.pdfTitle')}
             </div>
             <div className="mb-3 text-xs text-text-dim">{t('export.pdfDesc')}</div>
-            <Button size="sm" onClick={() => run('pdf', () => api.tests.exportPdf(testId))} disabled={busy !== null}>
-              {busy === 'pdf' ? t('export.generating') : t('export.pdfDownload')}
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" onClick={() => run('pdf-summary', () => api.tests.exportPdf(testId, 'summary'))} disabled={busy !== null}>
+                {busy === 'pdf-summary' ? t('export.generating') : t('export.pdfSummary')}
+              </Button>
+              <Button size="sm" variant="secondary" onClick={() => run('pdf-full', () => api.tests.exportPdf(testId, 'full'))} disabled={busy !== null}>
+                {busy === 'pdf-full' ? t('export.generating') : t('export.pdfFull')}
+              </Button>
+            </div>
           </Card>
           {status && <div className="text-xs text-text-dim">{status}</div>}
         </div>

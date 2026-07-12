@@ -11,7 +11,7 @@ import { useT } from '@renderer/i18n/useT'
 const STAGE_COLORS = ['var(--color-primary)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)', 'var(--chart-6)']
 
 export function FunnelResultsPage() {
-  const { testId } = useParams<{ testId: string }>()
+  const { workspaceId, panelId, testId } = useParams<{ workspaceId: string; panelId: string; testId: string }>()
   const [summary, setSummary] = useState<FunnelResultSummary | null>(null)
   const t = useT()
 
@@ -26,7 +26,12 @@ export function FunnelResultsPage() {
 
   return (
     <div className="p-8">
-      <PageHeader eyebrow={t('funnelResults.eyebrow')} title={t('funnelResults.title', { name: summary.test.nombre })} />
+      <PageHeader
+        eyebrow={t('funnelResults.eyebrow')}
+        title={t('funnelResults.title', { name: summary.test.nombre })}
+        backTo={`/w/${workspaceId}/panels/${panelId}`}
+        backLabel={t('nav.backToPanel')}
+      />
 
       <Card className="max-w-4xl p-6">
         {summary.etapas.map((stage, i) => {

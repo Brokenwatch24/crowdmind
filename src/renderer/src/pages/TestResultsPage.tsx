@@ -1,17 +1,17 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { FileText, Network } from 'lucide-react'
+import { FileText, MessageCircle, User } from 'lucide-react'
 import { api } from '@renderer/lib/api'
 import type { TestResultSummary } from '@shared/types'
 import { PageHeader } from '@renderer/components/PageHeader'
 import { Avatar } from '@renderer/components/Avatar'
 import { Card, CardContent } from '@renderer/components/ui/card'
 import { Badge } from '@renderer/components/ui/badge'
-import { Button } from '@renderer/components/ui/button'
 import { ConfidenceBadge } from '@renderer/components/ConfidenceBadge'
 import { ThemesSection } from '@renderer/components/ThemesSection'
 import { ExportDialog } from '@renderer/components/ExportDialog'
 import { NotesSection } from '@renderer/components/NotesSection'
+import { TestContinuationPanel } from '@renderer/components/TestContinuationPanel'
 import { useT } from '@renderer/i18n/useT'
 
 export function TestResultsPage() {
@@ -39,12 +39,11 @@ export function TestResultsPage() {
       <PageHeader
         eyebrow={t('testResults.eyebrow')}
         title={t('testResults.title', { name: summary.test.nombre })}
+        backTo={`/w/${workspaceId}/panels/${panelId}`}
+        backLabel={t('nav.backToPanel')}
         actions={
           <>
             <ConfidenceBadge indice={summary.test.indiceConfianza} disclaimers={summary.test.disclaimers} breakdown={summary.test.confianzaBreakdown} />
-            <Button variant="secondary" size="sm" onClick={() => navigate(`/w/${workspaceId}/panels/${panelId}/tests/${testId}/swarm`)}>
-              <Network size={14} /> {t('testResults.viewSwarm')}
-            </Button>
             {testId && <ExportDialog testId={testId} />}
           </>
         }
@@ -145,6 +144,8 @@ export function TestResultsPage() {
         </Card>
       )}
 
+      {workspaceId && <TestContinuationPanel summary={summary} workspaceId={workspaceId} panelId={panelId} />}
+
       <div className="mt-6 max-w-4xl">
         <div className="mb-3 text-sm font-medium text-text-muted">{t('testResults.byPersona')}</div>
         <div className="space-y-2">
@@ -155,7 +156,23 @@ export function TestResultsPage() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2">
                     <div className="text-sm font-semibold text-text">{r.persona.nombre}</div>
-                    <div className="font-mono-label text-xs font-semibold text-text">{r.scoreSatisfaccion}/10</div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        className="rounded p-1 text-text-dim hover:text-text"
+                        title={t('testResults.viewProfile')}
+                        onClick={() => navigate(`/w/${workspaceId}/panels/${panelId}/personas/${r.personaId}`)}
+                      >
+                        <User size={14} />
+                      </button>
+                      <button
+                        className="rounded p-1 text-text-dim hover:text-primary"
+                        title={t('testResults.chatWithPersona')}
+                        onClick={() => navigate(`/w/${workspaceId}/panels/${panelId}/personas/${r.personaId}?tab=chat`)}
+                      >
+                        <MessageCircle size={14} />
+                      </button>
+                      <div className="font-mono-label text-xs font-semibold text-text">{r.scoreSatisfaccion}/10</div>
+                    </div>
                   </div>
                   <div className="mt-1 text-sm text-text-muted">{r.opinionTexto}</div>
                   {Object.keys(r.scorecardScores).length > 0 && (

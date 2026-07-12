@@ -31,6 +31,7 @@ export function registerTestHandlers(): void {
         attachments?: EstimuloAttachment[]
         provider: ProviderId
         model?: string
+        responseLanguage?: 'es' | 'en'
         personaIds?: string[]
         scorecardCriteria?: string[]
       }
@@ -62,7 +63,8 @@ export function registerTestHandlers(): void {
             input.estimuloContenido,
             input.imagenDataUri,
             input.scorecardCriteria ?? [],
-            attachments
+            attachments,
+            input.responseLanguage ?? 'es'
           )
           testsRepo.saveRespuesta({
             testId: test.id,

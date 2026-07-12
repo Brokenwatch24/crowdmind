@@ -1,7 +1,7 @@
 import { ipcMain, BrowserWindow, dialog } from 'electron'
 import fs from 'node:fs'
 import { IPC } from '@shared/ipcChannels'
-import { generarReporteNarrativoHtml, generarReporteNarrativoMarkdown } from '../report/narrativeReport'
+import { generarReporteCompletoHtml, generarReporteNarrativoHtml, generarReporteNarrativoMarkdown } from '../report/narrativeReport'
 import { getTest, getTestResults } from '../db/repo/tests'
 import { listTemas } from '../db/repo/temas'
 
@@ -12,15 +12,15 @@ function safeFileName(name: string): string {
 export function registerExportHandlers(): void {
   ipcMain.handle(IPC.testsGetNarrativeReport, (_e, testId: string) => generarReporteNarrativoHtml(testId))
 
-  ipcMain.handle(IPC.testsExportPdf, async (event, testId: string) => {
-    const html = generarReporteNarrativoHtml(testId)
+  ipcMain.handle(IPC.testsExportPdf, async (event, testId: string, variant: 'summary' | 'full' = 'summary') => {
+    const html = variant === 'full' ? generarReporteCompletoHtml(testId) : generarReporteNarrativoHtml(testId)
     const test = getTest(testId)
     if (!html || !test) return { success: false as const }
 
     const parentWindow = BrowserWindow.fromWebContents(event.sender) ?? undefined
     const { canceled, filePath } = await dialog.showSaveDialog(parentWindow as BrowserWindow, {
       title: 'Exportar reporte como PDF',
-      defaultPath: `${safeFileName(test.nombre)}.pdf`,
+      defaultPath: `${safeFileName(test.nombre)}-${variant === 'full' ? 'informe-completo' : 'resumen'}.pdf`,
       filters: [{ name: 'PDF', extensions: ['pdf'] }]
     })
     if (canceled || !filePath) return { success: false as const }

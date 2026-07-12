@@ -24,6 +24,7 @@ export function registerFunnelHandlers(): void {
         etapas: EtapaFunnelDraft[]
         provider: ProviderId
         model?: string
+        responseLanguage?: 'es' | 'en'
         personaIds?: string[]
         scorecardCriteria?: string[]
       }
@@ -51,6 +52,7 @@ export function registerFunnelHandlers(): void {
         etapas,
         modoInteraccion: input.modoInteraccion,
         scorecardCriteria: input.scorecardCriteria ?? [],
+        responseLanguage: input.responseLanguage ?? 'es',
         resolveCallForPersona: (persona) => resolveCallForPersona(persona, input.workspaceId, input.provider, input.model)
       })
 
