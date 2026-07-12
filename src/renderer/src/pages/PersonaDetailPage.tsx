@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Send } from 'lucide-react'
+import { Send, Trash2 } from 'lucide-react'
 import { api } from '@renderer/lib/api'
 import { useAppStore } from '@renderer/store/useAppStore'
 import type { ChatMensaje, Persona } from '@shared/types'
@@ -11,6 +11,7 @@ import { VersionsTimeline } from '@renderer/components/VersionsTimeline'
 import { Card } from '@renderer/components/ui/card'
 import { Input } from '@renderer/components/ui/input'
 import { Button } from '@renderer/components/ui/button'
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@renderer/components/ui/dialog'
 import { formatDateTime } from '@renderer/lib/utils'
 import { useT } from '@renderer/i18n/useT'
 
@@ -24,6 +25,8 @@ export function PersonaDetailPage() {
   const [mensajes, setMensajes] = useState<ChatMensaje[]>([])
   const [chatInput, setChatInput] = useState('')
   const [sending, setSending] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   async function refresh() {
@@ -61,6 +64,17 @@ export function PersonaDetailPage() {
     }
   }
 
+  async function handleDelete() {
+    if (!personaId || !workspaceId || !panelId) return
+    setDeleting(true)
+    try {
+      await api.personas.delete(personaId)
+      navigate(`/w/${workspaceId}/panels/${panelId}`)
+    } finally {
+      setDeleting(false)
+    }
+  }
+
   if (!persona) return <div className="p-8 text-sm text-text-dim">{t('personaDetail.loading')}</div>
 
   return (
@@ -80,6 +94,30 @@ export function PersonaDetailPage() {
             {persona.edad} {t('personaDetail.years')} · {persona.ciudad} · {t('personaDetail.disposicion')}: {persona.disposicionBase}
           </div>
         </div>
+      </div>
+
+      <div className="mb-4 max-w-2xl">
+        <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+          <DialogTrigger asChild>
+            <Button variant="secondary" size="sm">
+              <Trash2 size={14} /> {t('personaDetail.delete')}
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogTitle>{t('personaDetail.deleteTitle')}</DialogTitle>
+            <div className="space-y-4">
+              <p className="text-sm text-text-muted">{t('personaDetail.deleteConfirm', { name: persona.nombre })}</p>
+              <div className="flex justify-end gap-2">
+                <Button variant="secondary" onClick={() => setDeleteOpen(false)} disabled={deleting}>
+                  {t('personaDetail.cancel')}
+                </Button>
+                <Button onClick={handleDelete} disabled={deleting}>
+                  {deleting ? t('personaDetail.deleting') : t('personaDetail.delete')}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <Tabs defaultValue="perfil">
