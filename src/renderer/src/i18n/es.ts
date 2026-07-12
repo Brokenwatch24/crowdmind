@@ -345,6 +345,9 @@ export const es = {
   'continuation.selectedTarget': '{{count}} personas seleccionadas',
   'continuation.allTarget': 'Todo el panel ({{count}})',
   'continuation.askTarget': 'Preguntar a {{count}}',
+  'continuation.expand': 'Abrir',
+  'continuation.collapse': 'Colapsar',
+  'continuation.previousCount': '{{count}} follow-ups',
 
   // Comparison
   'comparison.eyebrow': 'COMPARACIÓN',

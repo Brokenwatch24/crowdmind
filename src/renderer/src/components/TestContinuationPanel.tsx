@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { MessageCircle, Sparkles, Users } from 'lucide-react'
+import { ChevronDown, MessageCircle, Sparkles, Users } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '@renderer/lib/api'
 import { useAppStore } from '@renderer/store/useAppStore'
@@ -31,6 +31,7 @@ export function TestContinuationPanel({
   const provider = useAppStore((s) => s.currentProvider)
   const model = useAppStore((s) => s.currentModel)
   const language = useAppStore((s) => s.language)
+  const [open, setOpen] = useState(false)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [pregunta, setPregunta] = useState('')
   const [sending, setSending] = useState(false)
@@ -81,16 +82,29 @@ export function TestContinuationPanel({
 
   return (
     <Card className="mt-6 max-w-6xl p-4">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+      <div className={open ? 'mb-3 flex flex-wrap items-center justify-between gap-2' : 'flex flex-wrap items-center justify-between gap-2'}>
         <div>
           <div className="text-sm font-semibold text-text">{t('continuation.title')}</div>
-          <div className="mt-1 text-xs text-text-dim">{t('continuation.hint')}</div>
+          <div className="mt-1 text-xs text-text-dim">
+            {t('continuation.hint')}
+            {pastFollowUps.length > 0 && <span className="ml-2 font-mono-label">{t('continuation.previousCount', { count: pastFollowUps.length })}</span>}
+          </div>
         </div>
-        <Button variant="secondary" size="sm" onClick={() => setSelectedIds(allPersonaIds)} disabled={allPersonaIds.length === 0}>
-          <Users size={14} /> {t('continuation.selectAll')}
-        </Button>
+        <div className="flex gap-2">
+          {open && (
+            <Button variant="secondary" size="sm" onClick={() => setSelectedIds(allPersonaIds)} disabled={allPersonaIds.length === 0}>
+              <Users size={14} /> {t('continuation.selectAll')}
+            </Button>
+          )}
+          <Button variant="secondary" size="sm" onClick={() => setOpen((v) => !v)}>
+            <ChevronDown size={14} className={open ? 'rotate-180 transition-transform' : 'transition-transform'} />
+            {open ? t('continuation.collapse') : t('continuation.expand')}
+          </Button>
+        </div>
       </div>
 
+      {open && (
+        <>
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div>
           <div className="mb-2 text-xs text-text-dim">{t('swarm.dragHint')}</div>
@@ -179,6 +193,8 @@ export function TestContinuationPanel({
             ))}
           </div>
         </div>
+      )}
+        </>
       )}
     </Card>
   )

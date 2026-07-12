@@ -347,6 +347,9 @@ export const en: Record<keyof typeof es, string> = {
   'continuation.selectedTarget': '{{count}} personas selected',
   'continuation.allTarget': 'Full panel ({{count}})',
   'continuation.askTarget': 'Ask {{count}}',
+  'continuation.expand': 'Open',
+  'continuation.collapse': 'Collapse',
+  'continuation.previousCount': '{{count}} follow-ups',
 
   // Comparison
   'comparison.eyebrow': 'COMPARISON',
