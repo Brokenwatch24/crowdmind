@@ -6,9 +6,11 @@ import * as funnelRepo from '../db/repo/funnel'
 import * as personasRepo from '../db/repo/personas'
 import { resolveCallForPersona } from '../llm/resolveCall'
 import { runFunnelTest } from '../engine/funnelEngine'
+import { listFunnelTemplates } from '../funnelTemplates/funnelTemplates'
 
 export function registerFunnelHandlers(): void {
   ipcMain.handle(IPC.funnelGetResults, (_e, testId: string) => funnelRepo.getFunnelResults(testId))
+  ipcMain.handle(IPC.funnelTemplatesList, () => listFunnelTemplates())
 
   ipcMain.handle(
     IPC.funnelRun,

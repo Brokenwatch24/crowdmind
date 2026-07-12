@@ -1,9 +1,12 @@
-import { Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-react'
+import { useState } from 'react'
+import { Plus, Trash2, ChevronUp, ChevronDown, GripVertical } from 'lucide-react'
 import type { EstimuloTipo, EtapaFunnelDraft } from '@shared/types'
 import { Input } from '@renderer/components/ui/input'
 import { Textarea } from '@renderer/components/ui/textarea'
 import { Label } from '@renderer/components/ui/label'
 import { ImagePicker } from '@renderer/components/ImagePicker'
+import { cn } from '@renderer/lib/utils'
+import { useT } from '@renderer/i18n/useT'
 
 function emptyStage(orden: number): EtapaFunnelDraft {
   return { orden, tipoEstimulo: 'texto', estimuloContenido: '', estimuloMetadata: {}, titulo: `Etapa ${orden + 1}` }
@@ -15,6 +18,13 @@ function inferTipo(hasText: boolean, hasImage: boolean): EstimuloTipo {
   return 'texto'
 }
 
+function reorder<T>(list: T[], from: number, to: number): T[] {
+  const next = [...list]
+  const [moved] = next.splice(from, 1)
+  next.splice(to, 0, moved)
+  return next
+}
+
 export function FunnelBuilder({
   etapas,
   onChange
@@ -22,6 +32,10 @@ export function FunnelBuilder({
   etapas: EtapaFunnelDraft[]
   onChange: (etapas: EtapaFunnelDraft[]) => void
 }) {
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
+  const [dropIndex, setDropIndex] = useState<number | null>(null)
+  const t = useT()
+
   function update(index: number, patch: Partial<EtapaFunnelDraft>) {
     onChange(
       etapas.map((e, i) => {
@@ -39,20 +53,57 @@ export function FunnelBuilder({
   function move(index: number, dir: -1 | 1) {
     const target = index + dir
     if (target < 0 || target >= etapas.length) return
-    const next = [...etapas]
-    ;[next[index], next[target]] = [next[target], next[index]]
-    onChange(next.map((e, i) => ({ ...e, orden: i })))
+    onChange(reorder(etapas, index, target).map((e, i) => ({ ...e, orden: i })))
   }
 
   function add() {
     onChange([...etapas, emptyStage(etapas.length)])
   }
 
+  function handleDrop(targetIndex: number) {
+    if (draggedIndex === null || draggedIndex === targetIndex) {
+      setDraggedIndex(null)
+      setDropIndex(null)
+      return
+    }
+    onChange(reorder(etapas, draggedIndex, targetIndex).map((e, i) => ({ ...e, orden: i })))
+    setDraggedIndex(null)
+    setDropIndex(null)
+  }
+
   return (
     <div className="space-y-3">
       {etapas.map((etapa, i) => (
-        <div key={i} className="rounded-card border border-border bg-surface p-4">
+        <div
+          key={i}
+          draggable
+          onDragStart={(e) => {
+            setDraggedIndex(i)
+            e.dataTransfer.effectAllowed = 'move'
+          }}
+          onDragOver={(e) => {
+            e.preventDefault()
+            if (draggedIndex !== null && draggedIndex !== i) setDropIndex(i)
+          }}
+          onDragLeave={() => setDropIndex((d) => (d === i ? null : d))}
+          onDrop={(e) => {
+            e.preventDefault()
+            handleDrop(i)
+          }}
+          onDragEnd={() => {
+            setDraggedIndex(null)
+            setDropIndex(null)
+          }}
+          className={cn(
+            'rounded-card border bg-surface p-4 transition-all',
+            draggedIndex === i ? 'border-primary/40 opacity-40' : 'border-border',
+            dropIndex === i && draggedIndex !== i && 'border-primary ring-1 ring-primary/50'
+          )}
+        >
           <div className="mb-3 flex items-center gap-2">
+            <div className="cursor-grab text-text-dim active:cursor-grabbing" title={t('funnelBuilder.dragHint')}>
+              <GripVertical size={14} />
+            </div>
             <div className="flex h-5 w-5 flex-none items-center justify-center rounded-full border border-border bg-surface-2 font-mono-label text-[10.5px] text-text">
               {i + 1}
             </div>
@@ -60,7 +111,7 @@ export function FunnelBuilder({
               value={etapa.titulo}
               onChange={(e) => update(i, { titulo: e.target.value })}
               className="h-8 flex-1 text-sm font-semibold"
-              placeholder={`Etapa ${i + 1}`}
+              placeholder={t('funnelBuilder.stageLabel', { n: i + 1 })}
             />
             <div className="flex flex-none gap-0.5">
               <button className="rounded p-1 text-text-dim hover:text-text disabled:opacity-30" disabled={i === 0} onClick={() => move(i, -1)}>
@@ -82,7 +133,7 @@ export function FunnelBuilder({
             rows={3}
             value={etapa.estimuloContenido}
             onChange={(e) => update(i, { estimuloContenido: e.target.value })}
-            placeholder="¿Qué ve/experimenta la persona en esta etapa?"
+            placeholder={t('funnelBuilder.stagePlaceholder')}
           />
           <div className="mt-2.5">
             <ImagePicker
@@ -96,9 +147,9 @@ export function FunnelBuilder({
         onClick={add}
         className="flex w-full items-center justify-center gap-1.5 rounded-card border border-dashed border-border py-3 text-xs font-medium text-text-dim hover:text-text"
       >
-        <Plus size={13} /> Añadir etapa
+        <Plus size={13} /> {t('funnelBuilder.addStage')}
       </button>
-      {etapas.length === 0 && <Label className="text-[11px] normal-case">Añade al menos una etapa para configurar el funnel.</Label>}
+      {etapas.length === 0 && <Label className="text-[11px] normal-case">{t('funnelBuilder.empty')}</Label>}
     </div>
   )
 }

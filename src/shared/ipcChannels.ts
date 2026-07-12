@@ -20,6 +20,7 @@ export const IPC = {
   personasSaveBulk: 'personas:saveBulk',
   personasPickCsvFile: 'personas:pickCsvFile',
   personasImportCsvPreview: 'personas:importCsvPreview',
+  personasGenerateAvatarImage: 'personas:generateAvatarImage',
 
   versionsList: 'versions:list',
   versionsTestsUsing: 'versions:testsUsing',
@@ -43,6 +44,7 @@ export const IPC = {
   funnelEtapasSave: 'funnel:etapasSave',
   funnelRun: 'funnel:run',
   funnelGetResults: 'funnel:getResults',
+  funnelTemplatesList: 'funnel:templatesList',
 
   comparisonRun: 'comparison:run',
   comparisonList: 'comparison:list',

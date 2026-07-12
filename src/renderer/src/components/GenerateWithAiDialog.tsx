@@ -9,6 +9,7 @@ import { Textarea } from '@renderer/components/ui/textarea'
 import { Input } from '@renderer/components/ui/input'
 import { Label } from '@renderer/components/ui/label'
 import { PersonaForm } from './PersonaForm'
+import { useT } from '@renderer/i18n/useT'
 
 export function GenerateWithAiDialog({
   workspaceId,
@@ -29,6 +30,7 @@ export function GenerateWithAiDialog({
   const [preview, setPreview] = useState<PersonaDraft[] | null>(null)
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const t = useT()
 
   async function handleGenerate() {
     if (!brief.trim()) return
@@ -81,27 +83,27 @@ export function GenerateWithAiDialog({
     >
       <DialogTrigger asChild>
         <Button variant="secondary" size="sm">
-          <Sparkles size={14} /> Generar con IA
+          <Sparkles size={14} /> {t('genAi.button')}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
-        <DialogTitle>Generar personas con IA</DialogTitle>
+        <DialogTitle>{t('genAi.title')}</DialogTitle>
 
         {!preview ? (
           <div className="space-y-3">
             <div>
-              <Label htmlFor="brief">Describe la audiencia objetivo</Label>
+              <Label htmlFor="brief">{t('genAi.briefLabel')}</Label>
               <Textarea
                 id="brief"
                 className="mt-1.5"
                 rows={4}
                 value={brief}
                 onChange={(e) => setBrief(e.target.value)}
-                placeholder="Ej. Consumidores urbanos de 25-40 años en LatAm, interesados en alimentación saludable, ingreso medio, activos en redes sociales."
+                placeholder={t('genAi.briefPlaceholder')}
               />
             </div>
             <div className="w-32">
-              <Label htmlFor="count">Cantidad</Label>
+              <Label htmlFor="count">{t('genAi.countLabel')}</Label>
               <Input
                 id="count"
                 type="number"
@@ -114,13 +116,13 @@ export function GenerateWithAiDialog({
             </div>
             {error && <div className="text-xs text-danger">{error}</div>}
             <Button className="w-full" onClick={handleGenerate} disabled={loading || !brief.trim()}>
-              {loading ? 'Generando…' : `Generar ${count} personas`}
+              {loading ? t('genAi.generating') : t('genAi.generate', { count })}
             </Button>
           </div>
         ) : editingIndex !== null ? (
           <PersonaForm
             initial={preview[editingIndex]}
-            submitLabel="Guardar cambios"
+            submitLabel={t('personaDetail.saveChanges')}
             onSubmit={(draft) => {
               setPreview((prev) => prev!.map((p, i) => (i === editingIndex ? draft : p)))
               setEditingIndex(null)
@@ -128,15 +130,13 @@ export function GenerateWithAiDialog({
           />
         ) : (
           <div className="space-y-3">
-            <div className="text-xs text-text-muted">
-              Revisa y edita antes de guardar. {preview.length} personas listas.
-            </div>
+            <div className="text-xs text-text-muted">{t('genAi.reviewHint', { count: preview.length })}</div>
             <div className="max-h-96 space-y-2 overflow-y-auto">
               {preview.map((p, idx) => (
                 <div key={idx} className="flex items-start justify-between gap-3 rounded-lg border border-border bg-bg p-3">
                   <div className="min-w-0">
                     <div className="truncate text-sm font-semibold text-text">
-                      {p.nombre} <span className="font-normal text-text-dim">· {p.edad} años</span>
+                      {p.nombre} <span className="font-normal text-text-dim">· {p.edad} {t('personaDetail.years')}</span>
                     </div>
                     <div className="truncate text-xs text-text-muted">
                       {p.ocupacion} · {p.ciudad}, {p.pais} · {p.disposicionBase}
@@ -155,10 +155,10 @@ export function GenerateWithAiDialog({
             </div>
             <div className="flex gap-2">
               <Button variant="secondary" className="flex-1" onClick={() => setPreview(null)}>
-                Volver
+                {t('genAi.back')}
               </Button>
               <Button className="flex-1" onClick={handleConfirm} disabled={saving || preview.length === 0}>
-                {saving ? 'Guardando…' : `Guardar ${preview.length} personas`}
+                {saving ? t('genAi.saving') : t('genAi.save', { count: preview.length })}
               </Button>
             </div>
           </div>

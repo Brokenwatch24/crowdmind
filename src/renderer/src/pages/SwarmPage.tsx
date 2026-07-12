@@ -9,8 +9,10 @@ import { Textarea } from '@renderer/components/ui/textarea'
 import { Button } from '@renderer/components/ui/button'
 import { Avatar } from '@renderer/components/Avatar'
 import { SwarmCanvas, type SwarmNode } from '@renderer/components/SwarmCanvas'
+import { useT } from '@renderer/i18n/useT'
 
 export function SwarmPage() {
+  const t = useT()
   const { workspaceId, panelId, testId } = useParams<{ workspaceId: string; panelId: string; testId: string }>()
   const navigate = useNavigate()
   const provider = useAppStore((s) => s.currentProvider)
@@ -35,7 +37,7 @@ export function SwarmPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [testId])
 
-  if (!summary || !workspaceId || !testId) return <div className="p-8 text-sm text-text-dim">Cargando…</div>
+  if (!summary || !workspaceId || !testId) return <div className="p-8 text-sm text-text-dim">{t('common.loading')}</div>
 
   const nodes: SwarmNode[] = summary.respuestas.map((r) => ({
     id: r.personaId,
@@ -67,11 +69,11 @@ export function SwarmPage() {
 
   return (
     <div className="p-8">
-      <PageHeader eyebrow="TEST > ENJAMBRE" title={`Vista de enjambre — "${summary.test.nombre}"`} />
+      <PageHeader eyebrow={t('swarm.eyebrow')} title={t('swarm.title', { name: summary.test.nombre })} />
 
       <div className="flex flex-wrap gap-5">
         <div className="min-w-[420px] max-w-4xl flex-1">
-          <div className="mb-2 text-xs text-text-dim">Arrastra sobre el grafo para seleccionar un grupo de personas.</div>
+          <div className="mb-2 text-xs text-text-dim">{t('swarm.dragHint')}</div>
           <Card className="h-[440px] overflow-hidden">
             <SwarmCanvas
               nodes={nodes}
@@ -84,7 +86,7 @@ export function SwarmPage() {
           {activeResult && (
             <div className="mt-5">
               <div className="mb-2 flex items-center gap-2">
-                <div className="text-sm font-semibold text-text">Resultados del follow-up</div>
+                <div className="text-sm font-semibold text-text">{t('swarm.followUpResults')}</div>
                 <div className="rounded-md border border-border bg-surface px-2 py-0.5 font-mono-label text-[10.5px] text-text-dim">
                   ↳ "{activeResult.followUp.pregunta}"
                 </div>
@@ -92,7 +94,7 @@ export function SwarmPage() {
               <div className="flex flex-col overflow-hidden rounded-card border border-border">
                 {activeResult.respuestas.map((r) => (
                   <div key={r.id} className="flex items-center gap-3 border-b border-border p-3 last:border-b-0">
-                    <Avatar seed={r.persona.avatarSeed} name={r.persona.nombre} size={26} />
+                    <Avatar seed={r.persona.avatarSeed} name={r.persona.nombre} size={26} imageDataUri={r.persona.avatarImageDataUri} />
                     <div className="w-32 flex-none truncate text-xs font-medium text-text">{r.persona.nombre}</div>
                     <div className="flex-1 text-xs text-text-muted">"{r.respuestaTexto}"</div>
                   </div>
@@ -103,28 +105,28 @@ export function SwarmPage() {
         </div>
 
         <div className="w-80 flex-none rounded-card border border-border bg-surface-2 p-5">
-          <div className="mb-1 text-sm font-semibold text-text">Pregunta de seguimiento</div>
-          <div className="mb-3.5 font-mono-label text-[10.5px] text-text-dim">↳ vinculado a "{summary.test.nombre}"</div>
+          <div className="mb-1 text-sm font-semibold text-text">{t('swarm.followUpQuestion')}</div>
+          <div className="mb-3.5 font-mono-label text-[10.5px] text-text-dim">{t('swarm.followUpLinked', { name: summary.test.nombre })}</div>
           <Textarea
             rows={4}
             value={pregunta}
             onChange={(e) => setPregunta(e.target.value)}
-            placeholder="¿Qué te haría reconsiderar tu decisión?"
+            placeholder={t('swarm.followUpPlaceholder')}
           />
-          <div className="mt-2.5 text-xs font-medium text-text-dim">{selectedIds.length} personas seleccionadas</div>
+          <div className="mt-2.5 text-xs font-medium text-text-dim">{t('swarm.selectedCount', { count: selectedIds.length })}</div>
           <div className="mt-3.5 flex gap-2">
             <Button variant="secondary" className="flex-1" onClick={() => setSelectedIds([])} disabled={selectedIds.length === 0}>
-              Cancelar
+              {t('swarm.cancel')}
             </Button>
             <Button className="flex-1" onClick={handleSend} disabled={sending || !pregunta.trim() || selectedIds.length === 0}>
-              {sending ? 'Enviando…' : `Enviar a los ${selectedIds.length}`}
+              {sending ? t('swarm.sending') : t('swarm.sendTo', { count: selectedIds.length })}
             </Button>
           </div>
 
           {pastFollowUps.length > 0 && (
             <div className="mt-6 border-t border-border pt-4">
               <div className="mb-2 font-mono-label text-[10.5px] font-semibold tracking-wide text-text-dim">
-                FOLLOW-UPS ANTERIORES
+                {t('swarm.previousFollowUps')}
               </div>
               <div className="flex flex-col gap-1.5">
                 {pastFollowUps.map((fu) => (

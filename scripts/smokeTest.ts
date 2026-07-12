@@ -23,6 +23,7 @@ import { generarReporteNarrativoHtml, generarReporteNarrativoMarkdown } from '..
 import { parseCsvToPersonaDrafts } from '../src/main/csv/csvImport'
 import { buildMarketplaceTemplate, parseMarketplaceTemplate, listBundledTemplates, fetchRemoteTemplates } from '../src/main/marketplace/marketplace'
 import { seedDemoWorkspace } from '../src/main/demo/seedDemo'
+import { listFunnelTemplates } from '../src/main/funnelTemplates/funnelTemplates'
 import { parseDataUri } from '../src/main/llm/types'
 import { listPanels } from '../src/main/db/repo/panels'
 import { listTests } from '../src/main/db/repo/tests'
@@ -116,6 +117,13 @@ async function main() {
   assert(getLatestPersonaVersionId(persona.id) === versionsAfter[0].id, 'latest version id should match the most recent version')
   console.log(`[ok] persona versioning works — diff: "${versionsAfter[0].diffResumen}"`)
 
+  const TINY_JPEG_DATA_URI = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII='
+  const withAvatar = updatePersona(persona.id, { avatarImageDataUri: TINY_JPEG_DATA_URI })
+  assert(withAvatar.avatarImageDataUri === TINY_JPEG_DATA_URI, 'custom avatar image should round-trip through updatePersona')
+  const withoutAvatar = updatePersona(persona.id, { avatarImageDataUri: null })
+  assert(withoutAvatar.avatarImageDataUri === null, 'clearing the avatar image should round-trip as null')
+  console.log('[ok] custom persona avatar image (upload path) round-trips correctly')
+
   const followUpTargets = listed.slice(0, 3)
   const followUp = createFollowUp(test.id, '¿Qué te haría reconsiderar tu decisión?', followUpTargets.map((p) => p.id))
   for (const p of followUpTargets) {
@@ -197,6 +205,13 @@ async function main() {
   console.log(
     `[ok] bundled templates load and validate — ${bundledTemplates.map((b) => `${b.template.nombre} (${b.template.personas.length})`).join(', ')}`
   )
+
+  const funnelTemplates = listFunnelTemplates()
+  assert(funnelTemplates.length >= 5, `expected at least 5 funnel templates, got ${funnelTemplates.length}`)
+  for (const ft of funnelTemplates) {
+    assert(ft.etapas.length > 0, `funnel template "${ft.nombre}" has no stages`)
+  }
+  console.log(`[ok] funnel templates load and validate — ${funnelTemplates.map((t) => `${t.nombre} (${t.etapas.length} etapas)`).join(', ')}`)
 
   try {
     const remoteTemplates = await fetchRemoteTemplates()

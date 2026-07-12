@@ -6,6 +6,7 @@ import { WorkspaceSwitcher } from './WorkspaceSwitcher'
 import { ProviderSwitcher } from './ProviderSwitcher'
 import { UpdateBanner } from '@renderer/components/UpdateBanner'
 import { useAppStore } from '@renderer/store/useAppStore'
+import { useT } from '@renderer/i18n/useT'
 
 function NavItem({ to, icon: Icon, label }: { to: string; icon: typeof LayoutGrid; label: string }) {
   return (
@@ -26,6 +27,7 @@ function NavItem({ to, icon: Icon, label }: { to: string; icon: typeof LayoutGri
 
 export function AppShell() {
   const currentWorkspaceId = useAppStore((s) => s.currentWorkspaceId)
+  const t = useT()
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-bg text-text">
@@ -34,9 +36,9 @@ export function AppShell() {
           <Logo />
         </div>
         <nav className="flex flex-col gap-1">
-          <NavItem to={currentWorkspaceId ? `/w/${currentWorkspaceId}/panels` : '/workspaces'} icon={LayoutGrid} label="Paneles" />
-          {currentWorkspaceId && <NavItem to={`/w/${currentWorkspaceId}/comparisons`} icon={GitCompare} label="Comparar" />}
-          <NavItem to="/settings" icon={Settings} label="Ajustes" />
+          <NavItem to={currentWorkspaceId ? `/w/${currentWorkspaceId}/panels` : '/workspaces'} icon={LayoutGrid} label={t('nav.paneles')} />
+          {currentWorkspaceId && <NavItem to={`/w/${currentWorkspaceId}/comparisons`} icon={GitCompare} label={t('nav.comparar')} />}
+          <NavItem to="/settings" icon={Settings} label={t('nav.ajustes')} />
         </nav>
         <div className="mt-auto">
           <WorkspaceSwitcher />
@@ -45,7 +47,7 @@ export function AppShell() {
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex flex-none items-center justify-between border-b border-border px-6 py-3">
           <div className="font-mono-label text-[10.5px] font-semibold tracking-wide text-text-dim">
-            Crowdmind &middot; v2
+            {t('shell.tagline')} &middot; v2
           </div>
           <ProviderSwitcher />
         </header>

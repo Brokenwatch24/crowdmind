@@ -13,6 +13,7 @@ import type {
   FollowUp,
   FollowUpResultSummary,
   FunnelResultSummary,
+  FunnelTemplate,
   MarketplacePanelTemplate,
   ModoInteraccion,
   Panel,
@@ -64,7 +65,9 @@ const api = {
       ipcRenderer.invoke(IPC.personasSaveBulk, panelId, drafts),
     pickCsvFile: (): Promise<CsvPreview | null> => ipcRenderer.invoke(IPC.personasPickCsvFile),
     importCsvPreview: (input: { filePath: string; mapeoColumnas: CsvColumnMapping; agruparSimilares: boolean }): Promise<PersonaDraft[]> =>
-      ipcRenderer.invoke(IPC.personasImportCsvPreview, input)
+      ipcRenderer.invoke(IPC.personasImportCsvPreview, input),
+    generateAvatarImage: (input: { personaId: string; workspaceId: string }): Promise<Persona> =>
+      ipcRenderer.invoke(IPC.personasGenerateAvatarImage, input)
   },
   tests: {
     list: (panelId: string): Promise<CrowdmindTest[]> => ipcRenderer.invoke(IPC.testsList, panelId),
@@ -120,7 +123,8 @@ const api = {
       provider: ProviderId
       model?: string
       personaIds?: string[]
-    }): Promise<FunnelResultSummary> => ipcRenderer.invoke(IPC.funnelRun, input)
+    }): Promise<FunnelResultSummary> => ipcRenderer.invoke(IPC.funnelRun, input),
+    listTemplates: (): Promise<FunnelTemplate[]> => ipcRenderer.invoke(IPC.funnelTemplatesList)
   },
   comparison: {
     listTests: (workspaceId: string): Promise<Array<{ id: string; nombre: string; panelNombre: string }>> =>

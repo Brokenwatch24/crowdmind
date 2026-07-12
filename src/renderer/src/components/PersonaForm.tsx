@@ -7,6 +7,7 @@ import { Label } from '@renderer/components/ui/label'
 import { Button } from '@renderer/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@renderer/components/ui/select'
 import { tagsToString, stringToTags } from '@renderer/lib/csv'
+import { useT } from '@renderer/i18n/useT'
 
 const EMPTY: PersonaDraft = {
   nombre: '',
@@ -31,7 +32,7 @@ const EMPTY: PersonaDraft = {
 export function PersonaForm({
   initial,
   onSubmit,
-  submitLabel = 'Guardar persona'
+  submitLabel
 }: {
   initial?: Partial<PersonaDraft>
   onSubmit: (draft: PersonaDraft) => void | Promise<void>
@@ -39,6 +40,8 @@ export function PersonaForm({
 }) {
   const [draft, setDraft] = useState<PersonaDraft>({ ...EMPTY, ...initial })
   const [saving, setSaving] = useState(false)
+  const t = useT()
+  const resolvedSubmitLabel = submitLabel ?? t('personaForm.save')
 
   function set<K extends keyof PersonaDraft>(key: K, value: PersonaDraft[K]) {
     setDraft((prev) => ({ ...prev, [key]: value }))
@@ -58,11 +61,11 @@ export function PersonaForm({
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <Label htmlFor="p-nombre">Nombre</Label>
+          <Label htmlFor="p-nombre">{t('personaForm.nombre')}</Label>
           <Input id="p-nombre" className="mt-1.5" value={draft.nombre} onChange={(e) => set('nombre', e.target.value)} />
         </div>
         <div>
-          <Label htmlFor="p-edad">Edad</Label>
+          <Label htmlFor="p-edad">{t('personaForm.edad')}</Label>
           <Input
             id="p-edad"
             type="number"
@@ -72,23 +75,23 @@ export function PersonaForm({
           />
         </div>
         <div>
-          <Label htmlFor="p-genero">Género</Label>
+          <Label htmlFor="p-genero">{t('personaForm.genero')}</Label>
           <Input id="p-genero" className="mt-1.5" value={draft.genero} onChange={(e) => set('genero', e.target.value)} />
         </div>
         <div>
-          <Label htmlFor="p-ciudad">Ciudad</Label>
+          <Label htmlFor="p-ciudad">{t('personaForm.ciudad')}</Label>
           <Input id="p-ciudad" className="mt-1.5" value={draft.ciudad} onChange={(e) => set('ciudad', e.target.value)} />
         </div>
         <div>
-          <Label htmlFor="p-pais">País</Label>
+          <Label htmlFor="p-pais">{t('personaForm.pais')}</Label>
           <Input id="p-pais" className="mt-1.5" value={draft.pais} onChange={(e) => set('pais', e.target.value)} />
         </div>
         <div>
-          <Label htmlFor="p-ocupacion">Ocupación</Label>
+          <Label htmlFor="p-ocupacion">{t('personaForm.ocupacion')}</Label>
           <Input id="p-ocupacion" className="mt-1.5" value={draft.ocupacion} onChange={(e) => set('ocupacion', e.target.value)} />
         </div>
         <div>
-          <Label>Nivel de ingreso</Label>
+          <Label>{t('personaForm.nivelIngreso')}</Label>
           <Select value={draft.nivelIngreso} onValueChange={(v) => set('nivelIngreso', v as PersonaDraft['nivelIngreso'])}>
             <SelectTrigger className="mt-1.5 w-full">
               <SelectValue />
@@ -103,7 +106,7 @@ export function PersonaForm({
           </Select>
         </div>
         <div>
-          <Label>Disposición base</Label>
+          <Label>{t('personaForm.disposicionBase')}</Label>
           <Select value={draft.disposicionBase} onValueChange={(v) => set('disposicionBase', v as PersonaDraft['disposicionBase'])}>
             <SelectTrigger className="mt-1.5 w-full">
               <SelectValue />
@@ -118,21 +121,21 @@ export function PersonaForm({
           </Select>
         </div>
         <div>
-          <Label htmlFor="p-educ">Nivel educativo</Label>
+          <Label htmlFor="p-educ">{t('personaForm.nivelEducativo')}</Label>
           <Input id="p-educ" className="mt-1.5" value={draft.nivelEducativo} onChange={(e) => set('nivelEducativo', e.target.value)} />
         </div>
         <div>
-          <Label htmlFor="p-civil">Estado civil</Label>
+          <Label htmlFor="p-civil">{t('personaForm.estadoCivil')}</Label>
           <Input id="p-civil" className="mt-1.5" value={draft.estadoCivil} onChange={(e) => set('estadoCivil', e.target.value)} />
         </div>
         <div>
-          <Label htmlFor="p-canal">Canal preferido</Label>
+          <Label htmlFor="p-canal">{t('personaForm.canalPreferido')}</Label>
           <Input id="p-canal" className="mt-1.5" value={draft.canalPreferido} onChange={(e) => set('canalPreferido', e.target.value)} />
         </div>
       </div>
 
       <div>
-        <Label htmlFor="p-rasgos">Rasgos (separados por coma)</Label>
+        <Label htmlFor="p-rasgos">{t('personaForm.rasgos')}</Label>
         <Input
           id="p-rasgos"
           className="mt-1.5"
@@ -141,7 +144,7 @@ export function PersonaForm({
         />
       </div>
       <div>
-        <Label htmlFor="p-valores">Valores (separados por coma)</Label>
+        <Label htmlFor="p-valores">{t('personaForm.valores')}</Label>
         <Input
           id="p-valores"
           className="mt-1.5"
@@ -150,7 +153,7 @@ export function PersonaForm({
         />
       </div>
       <div>
-        <Label htmlFor="p-objeciones">Objeciones típicas (separadas por coma)</Label>
+        <Label htmlFor="p-objeciones">{t('personaForm.objeciones')}</Label>
         <Input
           id="p-objeciones"
           className="mt-1.5"
@@ -159,7 +162,7 @@ export function PersonaForm({
         />
       </div>
       <div>
-        <Label htmlFor="p-historia">Historia personal</Label>
+        <Label htmlFor="p-historia">{t('personaForm.historia')}</Label>
         <Textarea
           id="p-historia"
           className="mt-1.5"
@@ -170,7 +173,7 @@ export function PersonaForm({
       </div>
 
       <Button className="w-full" onClick={handleSubmit} disabled={saving || !draft.nombre.trim()}>
-        {saving ? 'Guardando…' : submitLabel}
+        {saving ? t('personaForm.saving') : resolvedSubmitLabel}
       </Button>
     </div>
   )

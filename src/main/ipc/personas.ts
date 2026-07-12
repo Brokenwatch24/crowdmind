@@ -5,6 +5,8 @@ import * as personasRepo from '../db/repo/personas'
 import { generatePersonasWithAi } from '../llm/useCases'
 import { resolveCall } from '../llm/resolveCall'
 import { readCsvPreview, parseCsvToPersonaDrafts } from '../csv/csvImport'
+import { generatePersonaAvatarImage } from '../avatarImage/generateAvatarImage'
+import { resolveProviderCredentials } from '../db/repo/providerSettings'
 
 export function registerPersonaHandlers(): void {
   ipcMain.handle(IPC.personasList, (_e, panelId: string) => personasRepo.listPersonas(panelId))
@@ -40,4 +42,12 @@ export function registerPersonaHandlers(): void {
     (_e, input: { filePath: string; mapeoColumnas: CsvColumnMapping; agruparSimilares: boolean }) =>
       parseCsvToPersonaDrafts(input.filePath, input.mapeoColumnas, input.agruparSimilares)
   )
+
+  ipcMain.handle(IPC.personasGenerateAvatarImage, async (_e, input: { personaId: string; workspaceId: string }) => {
+    const persona = personasRepo.getPersona(input.personaId)
+    if (!persona) throw new Error('Persona no encontrada')
+    const { apiKey } = resolveProviderCredentials('openai', input.workspaceId)
+    const dataUri = await generatePersonaAvatarImage(persona, apiKey)
+    return personasRepo.updatePersona(input.personaId, { avatarImageDataUri: dataUri })
+  })
 }

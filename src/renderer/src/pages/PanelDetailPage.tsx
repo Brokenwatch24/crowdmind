@@ -15,6 +15,7 @@ import { GenerateWithAiDialog } from '@renderer/components/GenerateWithAiDialog'
 import { CsvImportDialog } from '@renderer/components/CsvImportDialog'
 import { ExportPanelDialog } from '@renderer/components/ExportPanelDialog'
 import { formatDate } from '@renderer/lib/utils'
+import { useT } from '@renderer/i18n/useT'
 
 const DISPOSICION_VARIANT = {
   entusiasta: 'success',
@@ -30,6 +31,7 @@ export function PanelDetailPage() {
   const [personas, setPersonas] = useState<Persona[]>([])
   const [tests, setTests] = useState<CrowdmindTest[]>([])
   const [newPersonaOpen, setNewPersonaOpen] = useState(false)
+  const t = useT()
 
   async function refreshAll() {
     if (!panelId) return
@@ -49,12 +51,12 @@ export function PanelDetailPage() {
   return (
     <div className="p-8">
       <PageHeader
-        eyebrow={`WORKSPACE > PANEL`}
+        eyebrow={t('panelDetail.eyebrow')}
         title={panel?.nombre ?? '…'}
         actions={
           <>
             <Button variant="secondary" size="sm" onClick={() => navigate(`/w/${workspaceId}/panels/${panelId}/timeline`)}>
-              <TrendingUp size={14} /> Evolución
+              <TrendingUp size={14} /> {t('panelDetail.evolution')}
             </Button>
             <ExportPanelDialog panelId={panelId} />
           </>
@@ -63,8 +65,8 @@ export function PanelDetailPage() {
 
       <Tabs defaultValue="personas">
         <TabsList>
-          <TabsTrigger value="personas">Personas ({personas.length})</TabsTrigger>
-          <TabsTrigger value="tests">Tests ({tests.length})</TabsTrigger>
+          <TabsTrigger value="personas">{t('panelDetail.tabPersonas')} ({personas.length})</TabsTrigger>
+          <TabsTrigger value="tests">{t('panelDetail.tabTests')} ({tests.length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="personas">
@@ -74,11 +76,11 @@ export function PanelDetailPage() {
             <Dialog open={newPersonaOpen} onOpenChange={setNewPersonaOpen}>
               <DialogTrigger asChild>
                 <Button size="sm">
-                  <Plus size={14} /> Nueva persona
+                  <Plus size={14} /> {t('panelDetail.newPersona')}
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-xl">
-                <DialogTitle>Nueva persona</DialogTitle>
+                <DialogTitle>{t('panelDetail.newPersonaTitle')}</DialogTitle>
                 <PersonaForm
                   onSubmit={async (draft) => {
                     await api.personas.create(panelId, draft)
@@ -93,7 +95,7 @@ export function PanelDetailPage() {
           {personas.length === 0 ? (
             <Card>
               <CardContent className="py-14 text-center text-sm text-text-muted">
-                Este panel aún no tiene personas. Genera algunas con IA o créalas manualmente.
+                {t('panelDetail.personasEmpty')}
               </CardContent>
             </Card>
           ) : (
@@ -105,11 +107,11 @@ export function PanelDetailPage() {
                   onClick={() => navigate(`/w/${workspaceId}/panels/${panelId}/personas/${p.id}`)}
                 >
                   <div className="flex items-center gap-3">
-                    <Avatar seed={p.avatarSeed} name={p.nombre} size={36} />
+                    <Avatar seed={p.avatarSeed} name={p.nombre} size={36} imageDataUri={p.avatarImageDataUri} />
                     <div className="min-w-0">
                       <div className="truncate text-sm font-semibold text-text">{p.nombre}</div>
                       <div className="truncate text-xs text-text-dim">
-                        {p.edad} años · {p.ciudad}
+                        {p.edad} {t('personaDetail.years')} · {p.ciudad}
                       </div>
                     </div>
                   </div>
@@ -126,7 +128,7 @@ export function PanelDetailPage() {
         <TabsContent value="tests">
           <div className="mb-4 flex justify-end">
             <Button size="sm" onClick={() => navigate(`/w/${workspaceId}/panels/${panelId}/tests/new`)} disabled={personas.length === 0}>
-              <Plus size={14} /> Nuevo test
+              <Plus size={14} /> {t('panelDetail.newTest')}
             </Button>
           </div>
           {tests.length === 0 ? (
@@ -134,7 +136,7 @@ export function PanelDetailPage() {
               <CardContent className="flex flex-col items-center gap-2 py-14 text-center">
                 <FlaskConical size={20} className="text-text-dim" />
                 <div className="text-sm text-text-muted">
-                  {personas.length === 0 ? 'Añade personas antes de correr un test.' : 'Aún no hay tests en este panel.'}
+                  {personas.length === 0 ? t('panelDetail.testsEmptyNoPersonas') : t('panelDetail.testsEmpty')}
                 </div>
               </CardContent>
             </Card>

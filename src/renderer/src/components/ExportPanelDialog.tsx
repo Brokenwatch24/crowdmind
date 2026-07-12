@@ -6,6 +6,7 @@ import { Button } from '@renderer/components/ui/button'
 import { Input } from '@renderer/components/ui/input'
 import { Textarea } from '@renderer/components/ui/textarea'
 import { Label } from '@renderer/components/ui/label'
+import { useT } from '@renderer/i18n/useT'
 
 export function ExportPanelDialog({ panelId }: { panelId: string }) {
   const [open, setOpen] = useState(false)
@@ -13,13 +14,14 @@ export function ExportPanelDialog({ panelId }: { panelId: string }) {
   const [autor, setAutor] = useState('')
   const [busy, setBusy] = useState(false)
   const [status, setStatus] = useState<string | null>(null)
+  const t = useT()
 
   async function handleExport() {
     setBusy(true)
     setStatus(null)
     try {
       const result = await api.marketplace.exportPanel({ panelId, descripcionPublica: descripcion, autorPublico: autor })
-      setStatus(result.success ? `Guardado en: ${result.filePath}` : 'Exportación cancelada.')
+      setStatus(result.success ? t('export.savedAt', { path: result.filePath ?? '' }) : t('export.cancelled'))
     } finally {
       setBusy(false)
     }
@@ -29,26 +31,23 @@ export function ExportPanelDialog({ panelId }: { panelId: string }) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="secondary" size="sm">
-          <Share2 size={14} /> Exportar panel
+          <Share2 size={14} /> {t('panelDetail.exportPanel')}
         </Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogTitle>Exportar panel como plantilla pública</DialogTitle>
+        <DialogTitle>{t('exportPanel.title')}</DialogTitle>
         <div className="space-y-3">
-          <div className="text-xs text-text-muted">
-            Genera un archivo .json con las personas de este panel (sin resultados de tests) que puedes compartir donde quieras
-            — un Gist, un foro, etc. Cualquiera con Crowdmind podrá importarlo.
+          <div className="text-xs text-text-muted">{t('exportPanel.hint')}</div>
+          <div>
+            <Label htmlFor="export-desc">{t('exportPanel.descLabel')}</Label>
+            <Textarea id="export-desc" className="mt-1.5" rows={3} value={descripcion} onChange={(e) => setDescripcion(e.target.value)} placeholder={t('exportPanel.descPlaceholder')} />
           </div>
           <div>
-            <Label htmlFor="export-desc">Descripción pública</Label>
-            <Textarea id="export-desc" className="mt-1.5" rows={3} value={descripcion} onChange={(e) => setDescripcion(e.target.value)} placeholder="¿A quién representa este panel?" />
-          </div>
-          <div>
-            <Label htmlFor="export-autor">Autor</Label>
-            <Input id="export-autor" className="mt-1.5" value={autor} onChange={(e) => setAutor(e.target.value)} placeholder="Tu nombre o el de tu equipo" />
+            <Label htmlFor="export-autor">{t('exportPanel.authorLabel')}</Label>
+            <Input id="export-autor" className="mt-1.5" value={autor} onChange={(e) => setAutor(e.target.value)} placeholder={t('exportPanel.authorPlaceholder')} />
           </div>
           <Button className="w-full" onClick={handleExport} disabled={busy}>
-            {busy ? 'Exportando…' : 'Exportar plantilla'}
+            {busy ? t('exportPanel.exporting') : t('exportPanel.export')}
           </Button>
           {status && <div className="text-xs text-text-dim">{status}</div>}
         </div>

@@ -13,8 +13,10 @@ import { Label } from '@renderer/components/ui/label'
 import { cn } from '@renderer/lib/utils'
 import { PALETTE_COLORS } from '@renderer/lib/colors'
 import { ImportPanelDialog } from '@renderer/components/ImportPanelDialog'
+import { useT } from '@renderer/i18n/useT'
 
 export function PanelsPage() {
+  const t = useT()
   const { workspaceId } = useParams<{ workspaceId: string }>()
   const navigate = useNavigate()
   const [panels, setPanels] = useState<Panel[]>([])
@@ -50,30 +52,30 @@ export function PanelsPage() {
   return (
     <div className="p-8">
       <PageHeader
-        eyebrow="WORKSPACE"
-        title="Paneles"
+        eyebrow={t('panels.eyebrow')}
+        title={t('panels.title')}
         actions={
           <>
             {workspaceId && <ImportPanelDialog workspaceId={workspaceId} onImported={refresh} />}
             <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
               <Button size="sm">
-                <Plus size={14} /> Nuevo panel
+                <Plus size={14} /> {t('panels.new')}
               </Button>
             </DialogTrigger>
             <DialogContent>
-              <DialogTitle>Nuevo panel</DialogTitle>
+              <DialogTitle>{t('panels.newTitle')}</DialogTitle>
               <div className="space-y-3">
                 <div>
-                  <Label htmlFor="panel-nombre">Nombre</Label>
-                  <Input id="panel-nombre" className="mt-1.5" value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Ej. Consumidores LatAm 25–40" />
+                  <Label htmlFor="panel-nombre">{t('panels.nameLabel')}</Label>
+                  <Input id="panel-nombre" className="mt-1.5" value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder={t('panels.namePlaceholder')} />
                 </div>
                 <div>
-                  <Label htmlFor="panel-desc">Descripción</Label>
-                  <Textarea id="panel-desc" className="mt-1.5" rows={3} value={descripcion} onChange={(e) => setDescripcion(e.target.value)} placeholder="¿A quién representa este panel?" />
+                  <Label htmlFor="panel-desc">{t('panels.descLabel')}</Label>
+                  <Textarea id="panel-desc" className="mt-1.5" rows={3} value={descripcion} onChange={(e) => setDescripcion(e.target.value)} placeholder={t('panels.descPlaceholder')} />
                 </div>
                 <div>
-                  <Label>Color</Label>
+                  <Label>{t('panels.colorLabel')}</Label>
                   <div className="mt-1.5 flex gap-2">
                     {PALETTE_COLORS.map((c) => (
                       <button
@@ -86,7 +88,7 @@ export function PanelsPage() {
                   </div>
                 </div>
                 <Button className="w-full" onClick={handleCreate}>
-                  Crear panel
+                  {t('panels.create')}
                 </Button>
               </div>
             </DialogContent>
@@ -96,14 +98,14 @@ export function PanelsPage() {
       />
 
       {loading ? (
-        <div className="text-sm text-text-dim">Cargando…</div>
+        <div className="text-sm text-text-dim">{t('panels.loading')}</div>
       ) : panels.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center gap-2 py-14 text-center">
             <Users size={22} className="text-text-dim" />
-            <div className="text-sm text-text-muted">Aún no hay paneles en este workspace.</div>
+            <div className="text-sm text-text-muted">{t('panels.empty')}</div>
             <Button size="sm" className="mt-2" onClick={() => setOpen(true)}>
-              Crear tu primer panel
+              {t('panels.createFirst')}
             </Button>
           </CardContent>
         </Card>
@@ -120,12 +122,12 @@ export function PanelsPage() {
                 <div className="truncate text-sm font-semibold text-text">{p.nombre}</div>
                 {p.esPublico && (
                   <span className="rounded-chip border border-primary/30 bg-primary/15 px-1.5 py-0.5 font-mono-label text-[9.5px] text-primary">
-                    público
+                    {t('panels.public')}
                   </span>
                 )}
               </div>
-              <div className="mt-2 line-clamp-2 text-xs text-text-muted">{p.descripcion || 'Sin descripción.'}</div>
-              <div className="mt-3 font-mono-label text-[10.5px] text-text-dim">{p.personaCount ?? 0} personas</div>
+              <div className="mt-2 line-clamp-2 text-xs text-text-muted">{p.descripcion || t('panels.noDescription')}</div>
+              <div className="mt-3 font-mono-label text-[10.5px] text-text-dim">{p.personaCount ?? 0} {t('panels.personaCount')}</div>
             </Card>
           ))}
         </div>

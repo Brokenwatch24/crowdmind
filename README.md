@@ -12,7 +12,7 @@ new community-contributed persona templates.
 Repo: **https://github.com/Brokenwatch24/crowdmind**
 
 > **Status:** the full feature set below is implemented and verified end-to-end
-> (`npm run smoke-test`, 19 checks covering every feature). **[v0.1.0](https://github.com/Brokenwatch24/crowdmind/releases/tag/v0.1.0)**
+> (`npm run smoke-test`, 24 checks covering every feature). **[v0.1.0](https://github.com/Brokenwatch24/crowdmind/releases/tag/v0.1.0)**
 > is published with a Windows installer — download it directly, no build required. macOS/Linux
 > packaging is configured but unverified (this dev machine can't produce those builds) — see
 > [Cutting a release](#cutting-a-release) if you want to build and publish them from a Mac/Linux
@@ -25,13 +25,17 @@ Repo: **https://github.com/Brokenwatch24/crowdmind**
 - **Personas** — create manually, generate a batch with AI from a short brief, or **import from a CSV**
   of real survey data (map columns to fields, optionally group near-duplicate rows into one
   representative persona). Every path lands in the same editable preview before saving. Each persona
-  gets a deterministic, seed-based avatar.
+  gets a deterministic, seed-based avatar by default, or you can **upload your own image or generate one
+  with AI** (`gpt-image-1`) from the persona's profile.
 - **Tests** — single-stimulus (**text, image, or both**) or a full **funnel/sequence** of stages
   (multi-step landing→checkout style flows, each stage optionally with its own image), run in
   **individual** mode (everyone reacts independently and in parallel) or **focus group** mode (personas
   respond one at a time, seeing a rotating summary of what peers already said, so the first responder
   doesn't anchor the group). A rough cost estimate (tokens × approximate provider pricing) shows before
   you run anything.
+- **Funnel builder** — reorder stages with native **drag-and-drop**, or start from a bundled
+  **funnel template** (login flow, checkout, signup, AIDA landing page, app onboarding) and edit the
+  content per stage instead of writing one from scratch.
 - **Swarm view** — every response plotted as a force-directed graph node, colored by sentiment, with
   hover tooltips, click-through to the persona, and **drag-to-select a group** to fire a batch follow-up
   question at just those people.
@@ -43,6 +47,9 @@ Repo: **https://github.com/Brokenwatch24/crowdmind**
 - **Demo workspace** — one click on first launch generates a fully populated example (panel, 8 personas,
   a completed test with confidence index/themes/summary) using the Local provider, so the app is never
   just an empty screen.
+- **Language & theming** — switch the entire UI between **Spanish and English** at any time (Ajustes /
+  Settings), and pick between dark, light, and high-contrast themes — or customize individual colors
+  (background, surface, text, primary) and have them apply live across the whole app.
 
 **Analysis & trust**
 - **Confidence/diversity badge** — an auditable 0-100 score (sample size + score variance + demographic

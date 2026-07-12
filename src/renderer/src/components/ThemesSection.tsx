@@ -6,6 +6,7 @@ import { Card } from '@renderer/components/ui/card'
 import { Button } from '@renderer/components/ui/button'
 import { Avatar } from '@renderer/components/Avatar'
 import { RefreshCw } from 'lucide-react'
+import { useT } from '@renderer/i18n/useT'
 
 export function ThemesSection({
   testId,
@@ -20,6 +21,7 @@ export function ThemesSection({
   const model = useAppStore((s) => s.currentModel)
   const [temas, setTemas] = useState<TemaTest[]>([])
   const [loading, setLoading] = useState(false)
+  const t = useT()
 
   useEffect(() => {
     api.temas.list(testId).then(setTemas)
@@ -38,14 +40,14 @@ export function ThemesSection({
   return (
     <div className="mt-6 max-w-4xl">
       <div className="mb-3 flex items-center justify-between">
-        <div className="text-sm font-medium text-text-muted">Temas recurrentes</div>
+        <div className="text-sm font-medium text-text-muted">{t('themes.title')}</div>
         <Button variant="secondary" size="sm" onClick={handleReextraer} disabled={loading}>
-          <RefreshCw size={13} className={loading ? 'animate-spin' : ''} /> {loading ? 'Extrayendo…' : 'Volver a extraer'}
+          <RefreshCw size={13} className={loading ? 'animate-spin' : ''} /> {loading ? t('themes.refreshing') : t('themes.refresh')}
         </Button>
       </div>
 
       {temas.length === 0 ? (
-        <Card className="p-6 text-center text-sm text-text-dim">Aún no se han extraído temas para este test.</Card>
+        <Card className="p-6 text-center text-sm text-text-dim">{t('themes.empty')}</Card>
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {temas.map((tema) => (
@@ -53,7 +55,7 @@ export function ThemesSection({
               <div className="mb-3 flex items-center justify-between gap-2">
                 <div className="text-sm font-semibold text-text">{tema.nombreTema}</div>
                 <div className="rounded-chip bg-surface-2 px-2.5 py-0.5 font-mono-label text-[10.5px] text-text-muted">
-                  {tema.cantidadMenciones} menciones
+                  {tema.cantidadMenciones} {t('themes.mentions')}
                 </div>
               </div>
               <div className="flex flex-col gap-2.5">
@@ -61,7 +63,12 @@ export function ThemesSection({
                   const persona = personasById.get(v.personaId)
                   return (
                     <div key={i} className="flex gap-2.5 border-t border-border pt-2.5 first:border-t-0 first:pt-0">
-                      <Avatar seed={persona?.avatarSeed ?? v.personaId} name={persona?.nombre ?? '?'} size={24} />
+                      <Avatar
+                        seed={persona?.avatarSeed ?? v.personaId}
+                        name={persona?.nombre ?? '?'}
+                        size={24}
+                        imageDataUri={persona?.avatarImageDataUri}
+                      />
                       <div className="min-w-0">
                         <div className="text-[11.5px] font-semibold text-text">{persona?.nombre ?? 'Persona'}</div>
                         <div className="text-xs text-text-muted">"{v.quote}"</div>

@@ -83,14 +83,17 @@ export interface Persona {
   objecionesTipicas: string[]
   canalPreferido: string
   avatarSeed: string
+  /** User-uploaded or AI-generated profile photo (data: URI) — overrides the deterministic gradient avatar when set. */
+  avatarImageDataUri: string | null
   llmProviderOverride: ProviderId | null
   llmModelOverride: string | null
   createdAt: number
   updatedAt: number
 }
 
-export type PersonaDraft = Omit<Persona, 'id' | 'panelId' | 'createdAt' | 'updatedAt' | 'avatarSeed'> & {
+export type PersonaDraft = Omit<Persona, 'id' | 'panelId' | 'createdAt' | 'updatedAt' | 'avatarSeed' | 'avatarImageDataUri'> & {
   avatarSeed?: string
+  avatarImageDataUri?: string | null
 }
 
 export type PersonaSnapshot = Omit<Persona, 'id' | 'panelId' | 'createdAt' | 'updatedAt'>
@@ -115,6 +118,13 @@ export interface EtapaFunnel {
 }
 
 export type EtapaFunnelDraft = Omit<EtapaFunnel, 'id' | 'testId' | 'createdAt'>
+
+export interface FunnelTemplate {
+  formatVersion: 1
+  nombre: string
+  descripcion: string
+  etapas: Array<{ titulo: string; estimuloContenido: string }>
+}
 
 export interface ConfianzaBreakdown {
   tamanoMuestra: number

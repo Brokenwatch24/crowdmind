@@ -1,11 +1,11 @@
 import { z } from 'zod'
 import fs from 'node:fs'
 import path from 'node:path'
-import { app } from 'electron'
 import type { MarketplacePanelTemplate, PersonaDraft } from '@shared/types'
 import { DISPOSICIONES, NIVELES_INGRESO } from '@shared/types'
 import { listPersonas } from '../db/repo/personas'
 import { getPanel } from '../db/repo/panels'
+import { resolveBundledResourceDir } from '../resourcesPath'
 
 const personaDraftSchema = z.object({
   nombre: z.string(),
@@ -69,27 +69,18 @@ export function parseMarketplaceTemplate(jsonText: string): MarketplacePanelTemp
   return templateSchema.parse(parsed) as MarketplacePanelTemplate
 }
 
-/**
- * Templates that ship with the app, contributed via commits/PRs to `resources/templates/*.json` —
- * anyone can drop a new template file in that folder (same format the app's own export produces) and
- * it shows up here on the next release. Dev mode reads straight from the repo; a packaged build reads
- * from the copy electron-builder places under `resourcesPath` (see `extraResources` in
- * electron-builder.yml).
- */
-function bundledTemplatesDir(): string {
-  // Unpackaged (dev, smoke-test): both electron-vite and `npm run smoke-test` launch Electron with the
-  // project root as cwd, so process.cwd() is more reliable here than app.getAppPath() (which resolves
-  // relative to the entry script, not the project root, once code is bundled).
-  return app.isPackaged ? path.join(process.resourcesPath, 'templates') : path.join(process.cwd(), 'resources', 'templates')
-}
-
 export interface BundledTemplate {
   fileName: string
   template: MarketplacePanelTemplate
 }
 
+/**
+ * Templates that ship with the app, contributed via commits/PRs to `resources/templates/*.json` —
+ * anyone can drop a new template file in that folder (same format the app's own export produces) and
+ * it shows up here on the next release.
+ */
 export function listBundledTemplates(): BundledTemplate[] {
-  const dir = bundledTemplatesDir()
+  const dir = resolveBundledResourceDir('templates')
   if (!fs.existsSync(dir)) return []
 
   const results: BundledTemplate[] = []

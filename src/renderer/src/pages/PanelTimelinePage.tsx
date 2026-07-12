@@ -5,6 +5,7 @@ import type { Panel, PanelTimelinePoint } from '@shared/types'
 import { PageHeader } from '@renderer/components/PageHeader'
 import { Card } from '@renderer/components/ui/card'
 import { formatDate } from '@renderer/lib/utils'
+import { useT } from '@renderer/i18n/useT'
 
 const CHART_WIDTH = 900
 const CHART_HEIGHT = 220
@@ -15,6 +16,7 @@ export function PanelTimelinePage() {
   const navigate = useNavigate()
   const [panel, setPanel] = useState<Panel | null>(null)
   const [points, setPoints] = useState<PanelTimelinePoint[]>([])
+  const t = useT()
 
   useEffect(() => {
     if (!panelId) return
@@ -24,13 +26,13 @@ export function PanelTimelinePage() {
     })
   }, [panelId])
 
-  if (!panel) return <div className="p-8 text-sm text-text-dim">Cargando…</div>
+  if (!panel) return <div className="p-8 text-sm text-text-dim">{t('common.loading')}</div>
 
   if (points.length === 0) {
     return (
       <div className="p-8">
-        <PageHeader eyebrow={`PANEL: ${panel.nombre.toUpperCase()}`} title="Evolución en el tiempo" />
-        <Card className="p-6 text-center text-sm text-text-dim">Aún no hay tests en este panel para mostrar una evolución.</Card>
+        <PageHeader eyebrow={`${t('timeline.eyebrowPrefix')}: ${panel.nombre.toUpperCase()}`} title={t('timeline.title')} />
+        <Card className="p-6 text-center text-sm text-text-dim">{t('timeline.empty')}</Card>
       </div>
     )
   }
@@ -43,7 +45,7 @@ export function PanelTimelinePage() {
 
   return (
     <div className="p-8">
-      <PageHeader eyebrow={`PANEL: ${panel.nombre.toUpperCase()}`} title="Evolución en el tiempo" />
+      <PageHeader eyebrow={`${t('timeline.eyebrowPrefix')}: ${panel.nombre.toUpperCase()}`} title={t('timeline.title')} />
 
       <Card className="max-w-5xl p-6">
         <svg width="100%" height={CHART_HEIGHT} viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`} preserveAspectRatio="none" style={{ overflow: 'visible' }}>
@@ -64,9 +66,9 @@ export function PanelTimelinePage() {
 
       <Card className="mt-4 max-w-5xl overflow-hidden">
         <div className="grid grid-cols-[100px_1fr_80px_110px] gap-2.5 border-b border-border px-4 py-2.5 font-mono-label text-[10.5px] text-text-dim">
-          <div>FECHA</div>
-          <div>ESTÍMULO</div>
-          <div>SCORE</div>
+          <div>{t('timeline.date')}</div>
+          <div>{t('timeline.stimulus')}</div>
+          <div>{t('timeline.score')}</div>
           <div />
         </div>
         {points
@@ -83,7 +85,7 @@ export function PanelTimelinePage() {
                   navigate(`/w/${workspaceId}/panels/${panelId}/tests/${p.testId}${p.tipo === 'funnel' ? '/funnel' : ''}`)
                 }
               >
-                Ver resultados
+                {t('timeline.viewResults')}
               </button>
             </div>
           ))}

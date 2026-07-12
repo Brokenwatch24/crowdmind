@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { forceCenter, forceCollide, forceManyBody, forceSimulation, forceX, forceY, type SimulationNodeDatum } from 'd3-force'
 import { sentimentBucket } from '@shared/types'
+import { useT } from '@renderer/i18n/useT'
 
 export interface SwarmNode extends SimulationNodeDatum {
   id: string
@@ -28,6 +29,7 @@ export function SwarmCanvas({
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const t = useT()
   const nodesRef = useRef<SwarmNode[]>([])
   const selectedIdsRef = useRef<Set<string>>(new Set())
   const dragStateRef = useRef<{ startX: number; startY: number; dragging: boolean } | null>(null)
@@ -183,18 +185,18 @@ export function SwarmCanvas({
           onClick={clearSelection}
           className="absolute right-3.5 top-3.5 rounded-chip border border-primary/40 bg-primary/15 px-3 py-1.5 font-mono-label text-xs font-semibold text-primary"
         >
-          Limpiar selección ({selectedIdsRef.current.size})
+          {t('swarm.clearSelection', { count: selectedIdsRef.current.size })}
         </button>
       )}
       <div className="pointer-events-none absolute bottom-3.5 left-3.5 flex gap-3 font-mono-label text-[10.5px] text-text-dim">
         <span className="flex items-center gap-1.5">
-          <span className="h-1.5 w-1.5 rounded-full bg-success" /> positivo
+          <span className="h-1.5 w-1.5 rounded-full bg-success" /> {t('swarm.positive')}
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="h-1.5 w-1.5 rounded-full bg-warning" /> neutro
+          <span className="h-1.5 w-1.5 rounded-full bg-warning" /> {t('swarm.neutral')}
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="h-1.5 w-1.5 rounded-full bg-danger" /> negativo
+          <span className="h-1.5 w-1.5 rounded-full bg-danger" /> {t('swarm.negative')}
         </span>
       </div>
     </div>

@@ -71,6 +71,7 @@ export function toSnapshot(persona: {
   objecionesTipicas: string[]
   canalPreferido: string
   avatarSeed: string
+  avatarImageDataUri: string | null
   llmProviderOverride: PersonaSnapshot['llmProviderOverride']
   llmModelOverride: string | null
 }): PersonaSnapshot {

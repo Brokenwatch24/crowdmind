@@ -4,20 +4,21 @@ import type { PersonaVersion } from '@shared/types'
 import { formatDateTime } from '@renderer/lib/utils'
 import { Card } from '@renderer/components/ui/card'
 import { Badge } from '@renderer/components/ui/badge'
+import { useT, type TranslationKey } from '@renderer/i18n/useT'
 
-const SNAPSHOT_LABELS: Record<string, string> = {
-  nombre: 'Nombre',
-  edad: 'Edad',
-  genero: 'Género',
-  ciudad: 'Ciudad',
-  pais: 'País',
-  ocupacion: 'Ocupación',
-  nivelIngreso: 'Nivel de ingreso',
-  nivelEducativo: 'Nivel educativo',
-  estadoCivil: 'Estado civil',
-  disposicionBase: 'Disposición base',
-  historiaPersonal: 'Historia personal',
-  canalPreferido: 'Canal preferido'
+const SNAPSHOT_LABEL_KEYS: Record<string, TranslationKey> = {
+  nombre: 'personaForm.nombre',
+  edad: 'personaForm.edad',
+  genero: 'personaForm.genero',
+  ciudad: 'personaForm.ciudad',
+  pais: 'personaForm.pais',
+  ocupacion: 'personaForm.ocupacion',
+  nivelIngreso: 'personaForm.nivelIngreso',
+  nivelEducativo: 'personaForm.nivelEducativo',
+  estadoCivil: 'personaForm.estadoCivil',
+  disposicionBase: 'personaForm.disposicionBase',
+  historiaPersonal: 'personaForm.historia',
+  canalPreferido: 'personaForm.canalPreferido'
 }
 
 function TestsUsingVersion({ versionId }: { versionId: string }) {
@@ -46,6 +47,7 @@ function TestsUsingVersion({ versionId }: { versionId: string }) {
 export function VersionsTimeline({ personaId }: { personaId: string }) {
   const [versions, setVersions] = useState<PersonaVersion[]>([])
   const [selected, setSelected] = useState<PersonaVersion | null>(null)
+  const t = useT()
 
   useEffect(() => {
     api.versions.list(personaId).then((list) => {
@@ -55,7 +57,7 @@ export function VersionsTimeline({ personaId }: { personaId: string }) {
   }, [personaId])
 
   if (versions.length === 0) {
-    return <div className="py-10 text-center text-sm text-text-dim">Aún no hay historial — edita esta persona para empezar a versionarla.</div>
+    return <div className="py-10 text-center text-sm text-text-dim">{t('versions.empty')}</div>
   }
 
   return (
@@ -71,7 +73,7 @@ export function VersionsTimeline({ personaId }: { personaId: string }) {
               <Card className={`p-3.5 ${selected?.id === v.id ? 'border-primary/50' : ''}`}>
                 <div className="mb-1.5 flex items-center gap-2">
                   <div className="font-mono-label text-[11px] text-text-muted">{formatDateTime(v.createdAt)}</div>
-                  {i === 0 && <Badge variant="success">ACTUAL</Badge>}
+                  {i === 0 && <Badge variant="success">{t('versions.current')}</Badge>}
                 </div>
                 <div className="text-xs text-text-muted">{v.diffResumen}</div>
               </Card>
@@ -82,15 +84,15 @@ export function VersionsTimeline({ personaId }: { personaId: string }) {
 
       {selected && (
         <div className="h-fit w-72 flex-none rounded-card border border-border bg-surface-2 p-4">
-          <div className="mb-1 text-sm font-semibold text-text">Snapshot — solo lectura</div>
+          <div className="mb-1 text-sm font-semibold text-text">{t('versions.snapshotTitle')}</div>
           <div className="mb-3 font-mono-label text-[10.5px] text-text-dim">{formatDateTime(selected.createdAt)}</div>
           <div className="flex flex-col gap-1.5 text-xs">
-            {Object.entries(SNAPSHOT_LABELS).map(([key, label]) => {
+            {Object.entries(SNAPSHOT_LABEL_KEYS).map(([key, labelKey]) => {
               const value = (selected.snapshot as Record<string, unknown>)[key]
               if (value === undefined || value === '') return null
               return (
                 <div key={key} className="flex justify-between gap-3">
-                  <span className="flex-none text-text-dim">{label}</span>
+                  <span className="flex-none text-text-dim">{t(labelKey)}</span>
                   <span className="truncate text-right text-text-muted">{String(value)}</span>
                 </div>
               )

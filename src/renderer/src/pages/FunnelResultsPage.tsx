@@ -5,25 +5,27 @@ import type { FunnelResultSummary, NivelIngreso } from '@shared/types'
 import { NIVELES_INGRESO } from '@shared/types'
 import { PageHeader } from '@renderer/components/PageHeader'
 import { Card } from '@renderer/components/ui/card'
+import { useT } from '@renderer/i18n/useT'
 
 const STAGE_COLORS = ['var(--color-primary)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)', 'var(--chart-6)']
 
 export function FunnelResultsPage() {
   const { testId } = useParams<{ testId: string }>()
   const [summary, setSummary] = useState<FunnelResultSummary | null>(null)
+  const t = useT()
 
   useEffect(() => {
     if (!testId) return
     api.funnel.getResults(testId).then(setSummary)
   }, [testId])
 
-  if (!summary) return <div className="p-8 text-sm text-text-dim">Cargando resultados del funnel…</div>
+  if (!summary) return <div className="p-8 text-sm text-text-dim">{t('funnelResults.loadingResults')}</div>
 
   const primerEtapaTotal = summary.etapas[0]?.entraron || 1
 
   return (
     <div className="p-8">
-      <PageHeader eyebrow="PANEL > TEST" title={`Resultados del funnel — "${summary.test.nombre}"`} />
+      <PageHeader eyebrow={t('funnelResults.eyebrow')} title={t('funnelResults.title', { name: summary.test.nombre })} />
 
       <Card className="max-w-4xl p-6">
         {summary.etapas.map((stage, i) => {
@@ -45,7 +47,7 @@ export function FunnelResultsPage() {
                 </div>
               </div>
               {i > 0 && dropFromPrev > 0 && (
-                <div className="mb-3 ml-[13.5rem] font-mono-label text-[11px] font-semibold text-danger">↓ {dropPct}% de caída</div>
+                <div className="mb-3 ml-[13.5rem] font-mono-label text-[11px] font-semibold text-danger">{t('funnelResults.dropoff', { pct: `${dropPct}%` })}</div>
               )}
               {!(i > 0 && dropFromPrev > 0) && <div className="mb-3" />}
             </div>
@@ -54,7 +56,7 @@ export function FunnelResultsPage() {
       </Card>
 
       <div className="mt-6 max-w-4xl">
-        <div className="mb-3 text-sm font-medium text-text-muted">Funnel comparativo por nivel de ingreso</div>
+        <div className="mb-3 text-sm font-medium text-text-muted">{t('funnelResults.byIncome')}</div>
         <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-3">
           {NIVELES_INGRESO.map((nivel, colorIdx) => {
             const bars = summary.etapas.map((stage) => {
@@ -68,7 +70,7 @@ export function FunnelResultsPage() {
               <Card key={nivel} className="p-4">
                 <div className="mb-3 flex items-center gap-1.5 text-sm font-semibold text-text">
                   <span className="h-1.5 w-1.5 rounded-full" style={{ background: STAGE_COLORS[colorIdx % STAGE_COLORS.length] }} />
-                  Ingreso {nivel}
+                  {t('funnelResults.income')} {nivel}
                 </div>
                 {bars.map((pct, i) => (
                   <div

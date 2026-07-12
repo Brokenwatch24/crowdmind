@@ -4,7 +4,7 @@ import { Send } from 'lucide-react'
 import { api } from '@renderer/lib/api'
 import { useAppStore } from '@renderer/store/useAppStore'
 import type { ChatMensaje, Persona } from '@shared/types'
-import { Avatar } from '@renderer/components/Avatar'
+import { PersonaAvatarEditor } from '@renderer/components/PersonaAvatarEditor'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@renderer/components/ui/tabs'
 import { PersonaForm } from '@renderer/components/PersonaForm'
 import { VersionsTimeline } from '@renderer/components/VersionsTimeline'
@@ -12,8 +12,10 @@ import { Card } from '@renderer/components/ui/card'
 import { Input } from '@renderer/components/ui/input'
 import { Button } from '@renderer/components/ui/button'
 import { formatDateTime } from '@renderer/lib/utils'
+import { useT } from '@renderer/i18n/useT'
 
 export function PersonaDetailPage() {
+  const t = useT()
   const { workspaceId, panelId, personaId } = useParams<{ workspaceId: string; panelId: string; personaId: string }>()
   const navigate = useNavigate()
   const provider = useAppStore((s) => s.currentProvider)
@@ -59,7 +61,7 @@ export function PersonaDetailPage() {
     }
   }
 
-  if (!persona) return <div className="p-8 text-sm text-text-dim">Cargando…</div>
+  if (!persona) return <div className="p-8 text-sm text-text-dim">{t('personaDetail.loading')}</div>
 
   return (
     <div className="p-8">
@@ -67,31 +69,31 @@ export function PersonaDetailPage() {
         className="mb-4 font-mono-label text-[10.5px] text-text-dim hover:text-text"
         onClick={() => navigate(`/w/${workspaceId}/panels/${panelId}`)}
       >
-        &larr; Volver al panel
+        {t('personaDetail.back')}
       </button>
 
       <div className="mb-5 flex items-center gap-4">
-        <Avatar seed={persona.avatarSeed} name={persona.nombre} size={46} />
+        {workspaceId && <PersonaAvatarEditor persona={persona} workspaceId={workspaceId} onUpdated={setPersona} />}
         <div>
           <div className="text-lg font-semibold text-text">{persona.nombre}</div>
           <div className="text-xs text-text-dim">
-            {persona.edad} años · {persona.ciudad} · disposición: {persona.disposicionBase}
+            {persona.edad} {t('personaDetail.years')} · {persona.ciudad} · {t('personaDetail.disposicion')}: {persona.disposicionBase}
           </div>
         </div>
       </div>
 
       <Tabs defaultValue="perfil">
         <TabsList>
-          <TabsTrigger value="perfil">Perfil</TabsTrigger>
-          <TabsTrigger value="chat">Chat</TabsTrigger>
-          <TabsTrigger value="versiones">Historial de versiones</TabsTrigger>
+          <TabsTrigger value="perfil">{t('personaDetail.tabProfile')}</TabsTrigger>
+          <TabsTrigger value="chat">{t('personaDetail.tabChat')}</TabsTrigger>
+          <TabsTrigger value="versiones">{t('personaDetail.tabVersions')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="perfil">
           <div className="max-w-2xl">
             <PersonaForm
               initial={persona}
-              submitLabel="Guardar cambios"
+              submitLabel={t('personaDetail.saveChanges')}
               onSubmit={async (draft) => {
                 await api.personas.update(persona.id, draft)
                 refresh()
@@ -105,7 +107,7 @@ export function PersonaDetailPage() {
             <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto p-4">
               {mensajes.length === 0 && (
                 <div className="py-10 text-center text-xs text-text-dim">
-                  Empieza una conversación 1:1 con {persona.nombre}.
+                  {t('personaDetail.chatEmpty', { name: persona.nombre })}
                 </div>
               )}
               {mensajes.map((m) => (
@@ -128,7 +130,7 @@ export function PersonaDetailPage() {
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && !sending && handleSend()}
-                placeholder={`Escríbele a ${persona.nombre}…`}
+                placeholder={t('personaDetail.chatPlaceholder', { name: persona.nombre })}
                 disabled={sending}
               />
               <Button size="sm" onClick={handleSend} disabled={sending || !chatInput.trim()}>

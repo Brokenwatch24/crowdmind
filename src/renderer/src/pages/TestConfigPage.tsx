@@ -13,8 +13,10 @@ import { Textarea } from '@renderer/components/ui/textarea'
 import { Label } from '@renderer/components/ui/label'
 import { Button } from '@renderer/components/ui/button'
 import { FunnelBuilder } from '@renderer/components/FunnelBuilder'
+import { FunnelTemplatePicker } from '@renderer/components/FunnelTemplatePicker'
 import { ImagePicker } from '@renderer/components/ImagePicker'
 import { cn } from '@renderer/lib/utils'
+import { useT } from '@renderer/i18n/useT'
 
 type EstimuloMode = 'single' | 'sequence'
 
@@ -41,6 +43,7 @@ export function TestConfigPage() {
     { orden: 1, tipoEstimulo: 'texto', estimuloContenido: '', estimuloMetadata: {}, titulo: 'Etapa 2' }
   ])
   const [running, setRunning] = useState(false)
+  const t = useT()
 
   useEffect(() => {
     if (!panelId) return
@@ -82,7 +85,7 @@ export function TestConfigPage() {
         const result = await api.tests.runSimple({
           workspaceId,
           panelId,
-          nombre: nombre.trim() || 'Test sin título',
+          nombre: nombre.trim() || t('testConfig.defaultTestName'),
           estimuloTipo: inferTipo(estimulo.trim().length > 0, imagenDataUri !== null),
           estimuloContenido: estimulo,
           imagenDataUri: imagenDataUri ?? undefined,
@@ -95,7 +98,7 @@ export function TestConfigPage() {
         const result = await api.funnel.run({
           workspaceId,
           panelId,
-          nombre: nombre.trim() || 'Funnel sin título',
+          nombre: nombre.trim() || t('testConfig.defaultFunnelName'),
           modoInteraccion,
           etapas,
           provider,
@@ -111,7 +114,7 @@ export function TestConfigPage() {
 
   return (
     <div className="p-8">
-      <PageHeader eyebrow="PANEL > NUEVO TEST" title="Configurar estímulo" />
+      <PageHeader eyebrow={t('testConfig.eyebrow')} title={t('testConfig.title')} />
 
       <div className="mb-5 flex flex-wrap gap-2">
         <div className="flex gap-[3px] rounded-lg border border-border bg-surface p-[3px]">
@@ -119,13 +122,13 @@ export function TestConfigPage() {
             className={cn('rounded-md px-3.5 py-1.5 text-xs font-medium', estimuloMode === 'sequence' ? 'bg-surface-2 font-semibold text-text' : 'text-text-dim')}
             onClick={() => setEstimuloMode('sequence')}
           >
-            Secuencia / Funnel
+            {t('testConfig.sequence')}
           </button>
           <button
             className={cn('rounded-md px-3.5 py-1.5 text-xs font-medium', estimuloMode === 'single' ? 'bg-surface-2 font-semibold text-text' : 'text-text-dim')}
             onClick={() => setEstimuloMode('single')}
           >
-            Estímulo único
+            {t('testConfig.single')}
           </button>
         </div>
         {estimuloMode === 'sequence' && (
@@ -134,14 +137,14 @@ export function TestConfigPage() {
               className={cn('rounded-md px-3.5 py-1.5 text-xs font-medium', modoInteraccion === 'individual' ? 'bg-surface-2 font-semibold text-text' : 'text-text-dim')}
               onClick={() => setModoInteraccion('individual')}
             >
-              Modo individual
+              {t('testConfig.individualMode')}
             </button>
             <button
               className={cn('rounded-md px-3.5 py-1.5 text-xs font-medium', modoInteraccion === 'focus_group' ? 'bg-surface-2 font-semibold text-text' : 'text-text-dim')}
               onClick={() => setModoInteraccion('focus_group')}
-              title="Las personas ven las respuestas de las demás en su misma sesión — más lento y costoso."
+              title={t('testConfig.focusGroupTooltip')}
             >
-              Focus group
+              {t('testConfig.focusGroup')}
             </button>
           </div>
         )}
@@ -149,32 +152,32 @@ export function TestConfigPage() {
 
       {modoInteraccion === 'focus_group' && estimuloMode === 'sequence' && selected.size > 20 && (
         <div className="mb-4 max-w-2xl rounded-lg border border-warning/30 bg-warning/10 px-3 py-2 text-xs text-warning">
-          Focus group con paneles grandes es lento y costoso — se recomiendan máx. 15-20 personas por sesión.
+          {t('testConfig.focusGroupWarning')}
         </div>
       )}
 
       <Card className="max-w-2xl p-5">
         <div className="space-y-4">
           <div>
-            <Label htmlFor="test-nombre">Nombre del test</Label>
-            <Input id="test-nombre" className="mt-1.5" value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Ej. Lanzamiento Q3" />
+            <Label htmlFor="test-nombre">{t('testConfig.nameLabel')}</Label>
+            <Input id="test-nombre" className="mt-1.5" value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder={t('testConfig.namePlaceholder')} />
           </div>
 
           {estimuloMode === 'single' ? (
             <div className="space-y-3">
               <div>
-                <Label htmlFor="test-estimulo">Estímulo (texto)</Label>
+                <Label htmlFor="test-estimulo">{t('testConfig.stimulusLabel')}</Label>
                 <Textarea
                   id="test-estimulo"
                   className="mt-1.5"
                   rows={5}
                   value={estimulo}
                   onChange={(e) => setEstimulo(e.target.value)}
-                  placeholder="Describe el anuncio, producto o mensaje que quieres testear…"
+                  placeholder={t('testConfig.stimulusPlaceholder')}
                 />
               </div>
               <div>
-                <Label>Imagen (opcional)</Label>
+                <Label>{t('testConfig.imageLabel')}</Label>
                 <div className="mt-1.5">
                   <ImagePicker value={imagenDataUri} onChange={setImagenDataUri} />
                 </div>
@@ -182,17 +185,18 @@ export function TestConfigPage() {
             </div>
           ) : (
             <div>
-              <Label>Etapas del funnel</Label>
-              <div className="mt-1.5">
-                <FunnelBuilder etapas={etapas} onChange={setEtapas} />
+              <div className="mb-1.5 flex items-center justify-between">
+                <Label>{t('testConfig.stagesLabel')}</Label>
+                <FunnelTemplatePicker onPick={setEtapas} />
               </div>
+              <FunnelBuilder etapas={etapas} onChange={setEtapas} />
             </div>
           )}
         </div>
       </Card>
 
       <div className="mt-5 max-w-2xl">
-        <Label>Personas incluidas ({selected.size}/{personas.length})</Label>
+        <Label>{t('testConfig.personasIncluded', { selected: selected.size, total: personas.length })}</Label>
         <div className="mt-1.5 max-h-60 space-y-1 overflow-y-auto rounded-lg border border-border bg-surface p-2">
           {personas.map((p) => (
             <label
@@ -208,13 +212,13 @@ export function TestConfigPage() {
 
       <div className="mt-6 flex max-w-2xl items-center justify-between rounded-card border border-border bg-surface p-4">
         <div className="font-mono-label text-[11.5px] text-text-dim">
-          ~{selected.size} personas · proveedor: {PROVIDER_LABELS[provider]}
+          ~{selected.size} {t('comparison.personas')} · {t('testConfig.provider')}: {PROVIDER_LABELS[provider]}
           {costEstimate.estimatedCostUsd !== null && (
-            <> · ~${costEstimate.estimatedCostUsd < 0.01 ? '<0.01' : costEstimate.estimatedCostUsd.toFixed(2)} estimado</>
+            <> · ~${costEstimate.estimatedCostUsd < 0.01 ? '<0.01' : costEstimate.estimatedCostUsd.toFixed(2)} {t('testConfig.estimated')}</>
           )}
         </div>
         <Button onClick={handleRun} disabled={running || !isValid || selected.size === 0}>
-          {running ? 'Ejecutando…' : 'Ejecutar test'} <ArrowRight size={14} />
+          {running ? t('testConfig.running') : t('testConfig.run')} <ArrowRight size={14} />
         </Button>
       </div>
     </div>

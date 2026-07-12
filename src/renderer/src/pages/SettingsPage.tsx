@@ -9,11 +9,16 @@ import { Label } from '@renderer/components/ui/label'
 import { Button } from '@renderer/components/ui/button'
 import { Badge } from '@renderer/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@renderer/components/ui/select'
+import { AppearanceSettings } from '@renderer/components/AppearanceSettings'
+import { useAppStore } from '@renderer/store/useAppStore'
+import { useT } from '@renderer/i18n/useT'
+import { cn } from '@renderer/lib/utils'
 
 function ProviderRow({ setting, onChanged }: { setting: ProviderSetting; onChanged: () => void }) {
   const [apiKey, setApiKey] = useState('')
   const [saving, setSaving] = useState(false)
   const isLocal = setting.provider === 'local'
+  const t = useT()
 
   async function handleSaveKey() {
     if (!apiKey.trim()) return
@@ -39,16 +44,16 @@ function ProviderRow({ setting, onChanged }: { setting: ProviderSetting; onChang
           <div className="text-sm font-semibold text-text">{PROVIDER_LABELS[setting.provider]}</div>
           <div className="mt-1">
             {isLocal ? (
-              <Badge variant="neutral">no requiere API key</Badge>
+              <Badge variant="neutral">{t('settings.noApiKeyNeeded')}</Badge>
             ) : setting.hasApiKey ? (
-              <Badge variant="success">API key configurada</Badge>
+              <Badge variant="success">{t('settings.apiKeyConfigured')}</Badge>
             ) : (
-              <Badge variant="warning">sin API key</Badge>
+              <Badge variant="warning">{t('settings.noApiKey')}</Badge>
             )}
           </div>
         </div>
         <div className="w-52">
-          <Label>Modelo por defecto</Label>
+          <Label>{t('settings.defaultModel')}</Label>
           <Select
             value={setting.defaultModel}
             onValueChange={(model) =>
@@ -73,17 +78,17 @@ function ProviderRow({ setting, onChanged }: { setting: ProviderSetting; onChang
         <div className="mt-3 flex gap-2">
           <Input
             type="password"
-            placeholder="sk-..."
+            placeholder={t('settings.apiKeyPlaceholder')}
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSaveKey()}
           />
           <Button size="sm" onClick={handleSaveKey} disabled={saving || !apiKey.trim()}>
-            Guardar
+            {t('settings.save')}
           </Button>
           {setting.hasApiKey && (
             <Button size="sm" variant="secondary" onClick={handleClearKey}>
-              Borrar
+              {t('settings.delete')}
             </Button>
           )}
         </div>
@@ -92,9 +97,37 @@ function ProviderRow({ setting, onChanged }: { setting: ProviderSetting; onChang
   )
 }
 
+function LanguageSettings() {
+  const language = useAppStore((s) => s.language)
+  const setLanguage = useAppStore((s) => s.setLanguage)
+  const t = useT()
+
+  return (
+    <div>
+      <div className="text-sm font-semibold text-text">{t('settings.language')}</div>
+      <div className="mt-1 text-xs text-text-muted">{t('settings.languageHint')}</div>
+      <div className="mt-3 flex gap-[3px] rounded-lg border border-border bg-surface p-[3px] w-fit">
+        <button
+          className={cn('rounded-md px-3.5 py-1.5 text-xs font-medium', language === 'es' ? 'bg-surface-2 font-semibold text-text' : 'text-text-dim')}
+          onClick={() => setLanguage('es')}
+        >
+          Español
+        </button>
+        <button
+          className={cn('rounded-md px-3.5 py-1.5 text-xs font-medium', language === 'en' ? 'bg-surface-2 font-semibold text-text' : 'text-text-dim')}
+          onClick={() => setLanguage('en')}
+        >
+          English
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export function SettingsPage() {
   const [settings, setSettings] = useState<ProviderSetting[]>([])
   const [encryptionAvailable, setEncryptionAvailable] = useState<boolean | null>(null)
+  const t = useT()
 
   async function refresh() {
     const [list, enc] = await Promise.all([api.settings.listProviders(), api.settings.isEncryptionAvailable()])
@@ -108,19 +141,17 @@ export function SettingsPage() {
 
   return (
     <div className="p-8">
-      <PageHeader eyebrow="AJUSTES" title="Proveedores de IA" />
+      <PageHeader eyebrow={t('settings.eyebrow')} title={t('settings.providersTitle')} />
 
       {encryptionAvailable !== null && (
         <div className="mb-5 flex max-w-2xl items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2 text-xs text-text-muted">
           {encryptionAvailable ? (
             <>
-              <ShieldCheck size={14} className="text-success" /> Las API keys se cifran con el llavero del sistema operativo antes
-              de guardarse localmente.
+              <ShieldCheck size={14} className="text-success" /> {t('settings.encryptionAvailable')}
             </>
           ) : (
             <>
-              <ShieldAlert size={14} className="text-warning" /> El cifrado del sistema operativo no está disponible en esta
-              máquina — las API keys se guardan en texto plano en tu base de datos local.
+              <ShieldAlert size={14} className="text-warning" /> {t('settings.encryptionUnavailable')}
             </>
           )}
         </div>
@@ -130,6 +161,14 @@ export function SettingsPage() {
         {settings.map((s) => (
           <ProviderRow key={s.provider} setting={s} onChanged={refresh} />
         ))}
+      </div>
+
+      <div className="mt-8 max-w-2xl">
+        <LanguageSettings />
+      </div>
+
+      <div className="mt-8">
+        <AppearanceSettings />
       </div>
     </div>
   )

@@ -13,6 +13,8 @@ files:
 extraResources:
   - from: resources/templates
     to: templates
+  - from: resources/funnel-templates
+    to: funnel-templates
 
 asarUnpack:
   - '**/*.node'

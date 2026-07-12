@@ -196,6 +196,7 @@ function runAdditiveMigrations(sqlite: Database.Database): void {
   ensureColumn(sqlite, 'tests', 'disclaimers_json', "TEXT NOT NULL DEFAULT '[]'")
   ensureColumn(sqlite, 'tests', 'indice_confianza', 'INTEGER')
   ensureColumn(sqlite, 'tests', 'confianza_breakdown_json', 'TEXT')
+  ensureColumn(sqlite, 'personas', 'avatar_image_data_uri', 'TEXT')
 }
 
 export function getDb() {

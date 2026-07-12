@@ -26,6 +26,7 @@ function toPersona(row: typeof personas.$inferSelect): Persona {
     objecionesTipicas: JSON.parse(row.objecionesTipicasJson) as string[],
     canalPreferido: row.canalPreferido,
     avatarSeed: row.avatarSeed,
+    avatarImageDataUri: row.avatarImageDataUri,
     llmProviderOverride: (row.llmProviderOverride as Persona['llmProviderOverride']) ?? null,
     llmModelOverride: row.llmModelOverride,
     createdAt: row.createdAt,
@@ -71,6 +72,7 @@ export function createPersona(panelId: string, draft: PersonaDraft): Persona {
     objecionesTipicasJson: JSON.stringify(draft.objecionesTipicas ?? []),
     canalPreferido: draft.canalPreferido ?? '',
     avatarSeed: draft.avatarSeed ?? `${draft.nombre}-${newId()}`,
+    avatarImageDataUri: draft.avatarImageDataUri ?? null,
     llmProviderOverride: draft.llmProviderOverride ?? null,
     llmModelOverride: draft.llmModelOverride ?? null,
     createdAt: timestamp,
@@ -106,6 +108,7 @@ export function updatePersona(id: string, draft: Partial<PersonaDraft>): Persona
   if (draft.historiaPersonal !== undefined) patch.historiaPersonal = draft.historiaPersonal
   if (draft.objecionesTipicas !== undefined) patch.objecionesTipicasJson = JSON.stringify(draft.objecionesTipicas)
   if (draft.canalPreferido !== undefined) patch.canalPreferido = draft.canalPreferido
+  if (draft.avatarImageDataUri !== undefined) patch.avatarImageDataUri = draft.avatarImageDataUri
   if (draft.llmProviderOverride !== undefined) patch.llmProviderOverride = draft.llmProviderOverride
   if (draft.llmModelOverride !== undefined) patch.llmModelOverride = draft.llmModelOverride
 

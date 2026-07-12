@@ -46,6 +46,7 @@ export const personas = sqliteTable('personas', {
   objecionesTipicasJson: text('objeciones_tipicas_json').notNull().default('[]'),
   canalPreferido: text('canal_preferido').notNull().default(''),
   avatarSeed: text('avatar_seed').notNull(),
+  avatarImageDataUri: text('avatar_image_data_uri'),
   llmProviderOverride: text('llm_provider_override'),
   llmModelOverride: text('llm_model_override'),
   createdAt: integer('created_at').notNull(),

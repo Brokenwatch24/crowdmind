@@ -7,8 +7,10 @@ import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@renderer/com
 import { Button } from '@renderer/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@renderer/components/ui/select'
 import { PersonaForm } from './PersonaForm'
+import { useT } from '@renderer/i18n/useT'
 
 export function CsvImportDialog({ panelId, onSaved }: { panelId: string; onSaved: () => void }) {
+  const t = useT()
   const [open, setOpen] = useState(false)
   const [preview, setPreview] = useState<CsvPreview | null>(null)
   const [mapeo, setMapeo] = useState<CsvColumnMapping>({})
@@ -65,20 +67,20 @@ export function CsvImportDialog({ panelId, onSaved }: { panelId: string; onSaved
     >
       <DialogTrigger asChild>
         <Button variant="secondary" size="sm">
-          <Upload size={14} /> Importar CSV
+          <Upload size={14} /> {t('csv.button')}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
-        <DialogTitle>Importar personas desde CSV</DialogTitle>
+        <DialogTitle>{t('csv.title')}</DialogTitle>
 
         {!preview ? (
           <div className="flex flex-col items-center gap-3 py-8 text-center">
-            <div className="text-sm text-text-muted">Selecciona un archivo CSV con datos de encuesta para convertirlos en personas.</div>
-            <Button onClick={handlePickFile}>Elegir archivo…</Button>
+            <div className="text-sm text-text-muted">{t('csv.pickPrompt')}</div>
+            <Button onClick={handlePickFile}>{t('csv.pickFile')}</Button>
           </div>
         ) : !drafts ? (
           <div className="space-y-4">
-            <div className="text-xs text-text-dim">{preview.filePath.split(/[\\/]/).pop()} · {preview.headers.length} columnas</div>
+            <div className="text-xs text-text-dim">{preview.filePath.split(/[\\/]/).pop()} · {preview.headers.length} {t('csv.columns')}</div>
             <div className="max-h-72 space-y-2 overflow-y-auto">
               {preview.headers.map((header) => (
                 <div key={header} className="flex items-center gap-3">
@@ -88,7 +90,7 @@ export function CsvImportDialog({ panelId, onSaved }: { panelId: string; onSaved
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="__skip__">— No importar —</SelectItem>
+                      <SelectItem value="__skip__">{t('csv.noImport')}</SelectItem>
                       {CSV_MAPPABLE_FIELDS.map((f) => (
                         <SelectItem key={f.field} value={f.field}>
                           {f.label}
@@ -101,21 +103,21 @@ export function CsvImportDialog({ panelId, onSaved }: { panelId: string; onSaved
             </div>
             <label className="flex items-center gap-2 text-xs text-text-muted">
               <input type="checkbox" checked={agruparSimilares} onChange={(e) => setAgruparSimilares(e.target.checked)} />
-              Agrupar filas similares (mismo nivel de ingreso, disposición y rango de edad) en una sola persona
+              {t('csv.groupSimilar')}
             </label>
             <div className="flex gap-2">
               <Button variant="secondary" className="flex-1" onClick={reset}>
-                Volver
+                {t('csv.back')}
               </Button>
               <Button className="flex-1" onClick={handlePreviewImport} disabled={loading}>
-                {loading ? 'Procesando…' : 'Previsualizar'}
+                {loading ? t('csv.processing') : t('csv.preview')}
               </Button>
             </div>
           </div>
         ) : editingIndex !== null ? (
           <PersonaForm
             initial={drafts[editingIndex]}
-            submitLabel="Guardar cambios"
+            submitLabel={t('personaDetail.saveChanges')}
             onSubmit={(draft) => {
               setDrafts((prev) => prev!.map((p, i) => (i === editingIndex ? draft : p)))
               setEditingIndex(null)
@@ -123,13 +125,13 @@ export function CsvImportDialog({ panelId, onSaved }: { panelId: string; onSaved
           />
         ) : (
           <div className="space-y-3">
-            <div className="text-xs text-text-muted">{drafts.length} personas listas para importar. Revisa y edita antes de guardar.</div>
+            <div className="text-xs text-text-muted">{t('csv.readyCount', { count: drafts.length })}</div>
             <div className="max-h-96 space-y-2 overflow-y-auto">
               {drafts.map((p, idx) => (
                 <div key={idx} className="flex items-start justify-between gap-3 rounded-lg border border-border bg-bg p-3">
                   <div className="min-w-0">
                     <div className="truncate text-sm font-semibold text-text">
-                      {p.nombre} <span className="font-normal text-text-dim">· {p.edad} años</span>
+                      {p.nombre} <span className="font-normal text-text-dim">· {p.edad} {t('personaDetail.years')}</span>
                     </div>
                     <div className="truncate text-xs text-text-muted">
                       {p.ocupacion} · {p.ciudad}, {p.pais} · {p.disposicionBase}
@@ -148,10 +150,10 @@ export function CsvImportDialog({ panelId, onSaved }: { panelId: string; onSaved
             </div>
             <div className="flex gap-2">
               <Button variant="secondary" className="flex-1" onClick={() => setDrafts(null)}>
-                Volver
+                {t('csv.back')}
               </Button>
               <Button className="flex-1" onClick={handleConfirm} disabled={saving || drafts.length === 0}>
-                {saving ? 'Guardando…' : `Guardar ${drafts.length} personas`}
+                {saving ? t('csv.saving') : t('csv.save', { count: drafts.length })}
               </Button>
             </div>
           </div>

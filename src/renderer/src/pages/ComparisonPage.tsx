@@ -8,11 +8,7 @@ import { Button } from '@renderer/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@renderer/components/ui/select'
 import { SwarmCanvas, type SwarmNode } from '@renderer/components/SwarmCanvas'
 import { cn } from '@renderer/lib/utils'
-
-const MODES: Array<{ id: ComparacionModo; title: string; desc: string }> = [
-  { id: 'mismo_panel_dos_estimulos', title: 'Mismo panel, dos estímulos', desc: 'Comparación A/B clásica sobre la misma audiencia.' },
-  { id: 'mismo_estimulo_dos_paneles', title: 'Mismo estímulo, dos paneles', desc: 'Cómo reaccionan dos audiencias distintas al mismo estímulo.' }
-]
+import { useT } from '@renderer/i18n/useT'
 
 function toNodes(result: ComparacionResult['testA']): SwarmNode[] {
   return result.respuestas.map((r) => ({ id: r.personaId, nombre: r.persona.nombre, score: r.scoreSatisfaccion, quote: r.opinionTexto.slice(0, 90) }))
@@ -20,6 +16,11 @@ function toNodes(result: ComparacionResult['testA']): SwarmNode[] {
 
 export function ComparisonPage() {
   const { workspaceId } = useParams<{ workspaceId: string }>()
+  const t = useT()
+  const MODES: Array<{ id: ComparacionModo; title: string; desc: string }> = [
+    { id: 'mismo_panel_dos_estimulos', title: t('comparison.modeStimuli'), desc: t('comparison.modeStimuliDesc') },
+    { id: 'mismo_estimulo_dos_paneles', title: t('comparison.modePanels'), desc: t('comparison.modePanelsDesc') }
+  ]
   const [tests, setTests] = useState<Array<{ id: string; nombre: string; panelNombre: string }>>([])
   const [modo, setModo] = useState<ComparacionModo>('mismo_panel_dos_estimulos')
   const [testAId, setTestAId] = useState<string>('')
@@ -45,7 +46,7 @@ export function ComparisonPage() {
 
   return (
     <div className="p-8">
-      <PageHeader eyebrow="COMPARACIÓN" title="Comparar paneles / audiencias" />
+      <PageHeader eyebrow={t('comparison.eyebrow')} title={t('comparison.title')} />
 
       <div className="mb-5 flex flex-wrap gap-3">
         {MODES.map((m) => (
@@ -66,10 +67,10 @@ export function ComparisonPage() {
       <Card className="max-w-3xl p-5">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <div className="mb-1.5 font-mono-label text-[10.5px] text-text-dim">TEST A</div>
+            <div className="mb-1.5 font-mono-label text-[10.5px] text-text-dim">{t('comparison.testA')}</div>
             <Select value={testAId} onValueChange={setTestAId}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Selecciona un test" />
+                <SelectValue placeholder={t('comparison.selectTest')} />
               </SelectTrigger>
               <SelectContent>
                 {tests.map((t) => (
@@ -81,10 +82,10 @@ export function ComparisonPage() {
             </Select>
           </div>
           <div>
-            <div className="mb-1.5 font-mono-label text-[10.5px] text-text-dim">TEST B</div>
+            <div className="mb-1.5 font-mono-label text-[10.5px] text-text-dim">{t('comparison.testB')}</div>
             <Select value={testBId} onValueChange={setTestBId}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Selecciona un test" />
+                <SelectValue placeholder={t('comparison.selectTest')} />
               </SelectTrigger>
               <SelectContent>
                 {tests.map((t) => (
@@ -97,7 +98,7 @@ export function ComparisonPage() {
           </div>
         </div>
         <Button className="mt-4" onClick={handleCompare} disabled={loading || !testAId || !testBId || testAId === testBId}>
-          {loading ? 'Comparando…' : 'Comparar'}
+          {loading ? t('comparison.comparing') : t('comparison.compare')}
         </Button>
       </Card>
 
@@ -108,7 +109,7 @@ export function ComparisonPage() {
               <Card key={i} className="p-4">
                 <div className="mb-2 flex items-center justify-between">
                   <div className="text-sm font-semibold text-text">{r.test.nombre}</div>
-                  <div className="font-mono-label text-[11px] text-text-dim">{r.respuestas.length} personas</div>
+                  <div className="font-mono-label text-[11px] text-text-dim">{r.respuestas.length} {t('comparison.personas')}</div>
                 </div>
                 <div className="mb-3 flex h-2 overflow-hidden rounded-full">
                   <div style={{ width: `${(r.distribucion.positivo / (r.respuestas.length || 1)) * 100}%`, background: 'var(--color-success)' }} />
@@ -124,9 +125,9 @@ export function ComparisonPage() {
 
           <div className="mt-6 max-w-4xl">
             <div className="mb-3 flex items-center gap-2 text-sm font-medium text-text-muted">
-              Delta por persona
+              {t('comparison.deltaByPersona')}
               <span className={cn('font-mono-label text-xs', result.scorePromedioDelta >= 0 ? 'text-success' : 'text-danger')}>
-                (promedio {result.scorePromedioDelta >= 0 ? '+' : ''}
+                ({t('comparison.average')} {result.scorePromedioDelta >= 0 ? '+' : ''}
                 {result.scorePromedioDelta.toFixed(1)})
               </span>
             </div>
