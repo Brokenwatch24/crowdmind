@@ -361,10 +361,10 @@ export interface MarketplacePanelTemplate {
 export type UpdateStatus =
   | { state: 'idle' }
   | { state: 'checking' }
-  | { state: 'not-available' }
-  | { state: 'available'; version: string }
-  | { state: 'downloading'; percent: number }
-  | { state: 'downloaded'; version: string }
+  | { state: 'not-available'; checkedAt?: number }
+  | { state: 'available'; version: string; releaseName?: string; releaseNotes?: string; releaseDate?: string }
+  | { state: 'downloading'; version?: string; percent: number; transferred?: number; total?: number; bytesPerSecond?: number }
+  | { state: 'downloaded'; version: string; releaseName?: string; releaseNotes?: string; releaseDate?: string }
   | { state: 'error'; message: string }
 
 export function sentimentBucket(score: number): 'positivo' | 'neutro' | 'negativo' {

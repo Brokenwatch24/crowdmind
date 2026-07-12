@@ -391,9 +391,19 @@ export const es = {
 
   // Update banner
   'update.available': 'Nueva versión {{version}} disponible.',
+  'update.idle': 'Actualizaciones automaticas listas.',
+  'update.check': 'Buscar actualizaciones',
+  'update.checking': 'Buscando actualizaciones...',
+  'update.checkAgain': 'Buscar de nuevo',
+  'update.notAvailable': 'Ya tienes la ultima version.',
+  'update.error': 'Error de actualizacion: {{message}}',
+  'update.retry': 'Reintentar',
+  'update.showChangelog': 'Ver cambios',
+  'update.hideChangelog': 'Ocultar cambios',
   'update.download': 'Descargar',
   'update.starting': 'Iniciando…',
   'update.downloading': 'Descargando actualización… {{percent}}%',
   'update.ready': 'Actualización {{version}} lista para instalar.',
+  'update.downloadingDetail': 'Descargando {{percent}}% · {{transferred}} / {{total}} · {{speed}}',
   'update.restartNow': 'Reiniciar ahora'
 } as const

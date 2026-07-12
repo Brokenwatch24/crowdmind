@@ -65,6 +65,7 @@ export const IPC = {
   marketplaceRefreshFromRepo: 'marketplace:refreshFromRepo',
 
   updateCheck: 'update:check',
+  updateGetStatus: 'update:getStatus',
   updateDownload: 'update:download',
   updateInstall: 'update:install',
   updateIsSupported: 'update:isSupported',

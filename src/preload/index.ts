@@ -165,6 +165,7 @@ const api = {
   },
   update: {
     isSupported: (): Promise<boolean> => ipcRenderer.invoke(IPC.updateIsSupported),
+    getStatus: (): Promise<UpdateStatus> => ipcRenderer.invoke(IPC.updateGetStatus),
     check: (): Promise<void> => ipcRenderer.invoke(IPC.updateCheck),
     download: (): Promise<void> => ipcRenderer.invoke(IPC.updateDownload),
     install: (): Promise<void> => ipcRenderer.invoke(IPC.updateInstall),

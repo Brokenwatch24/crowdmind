@@ -393,9 +393,19 @@ export const en: Record<keyof typeof es, string> = {
 
   // Update banner
   'update.available': 'New version {{version}} available.',
+  'update.idle': 'Automatic updates ready.',
+  'update.check': 'Check for updates',
+  'update.checking': 'Checking for updates...',
+  'update.checkAgain': 'Check again',
+  'update.notAvailable': 'You are on the latest version.',
+  'update.error': 'Update error: {{message}}',
+  'update.retry': 'Retry',
+  'update.showChangelog': 'View changes',
+  'update.hideChangelog': 'Hide changes',
   'update.download': 'Download',
   'update.starting': 'Starting…',
   'update.downloading': 'Downloading update… {{percent}}%',
   'update.ready': 'Update {{version}} ready to install.',
+  'update.downloadingDetail': 'Downloading {{percent}}% · {{transferred}} / {{total}} · {{speed}}',
   'update.restartNow': 'Restart now'
 }
