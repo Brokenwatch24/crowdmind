@@ -25,8 +25,6 @@
   <img alt="Electron" src="https://img.shields.io/badge/Electron-React%20%2B%20TypeScript-9cf" />
 </p>
 
-![Crowdmind dashboard preview](docs/assets/crowdmind-dashboard-preview.svg)
-
 ## Why Crowdmind?
 
 Crowdmind is a local-first desktop app for fast qualitative research before you spend money on real panels, ads, prototypes, or customer interviews.
@@ -36,8 +34,6 @@ Create a panel of synthetic personas, show them a product, message, landing page
 It is built for founders, product marketers, researchers, agencies, and product teams who want directional signal in minutes while keeping their research data on their own machine.
 
 ## What It Does
-
-![Crowdmind test continuation preview](docs/assets/crowdmind-test-preview.svg)
 
 - **Create realistic persona panels** manually, from CSV, from marketplace templates, or with AI.
 - **Run stimulus tests** with text, multiple images, PDFs, or full funnel sequences.
@@ -52,8 +48,6 @@ It is built for founders, product marketers, researchers, agencies, and product 
 ## Reports
 
 Crowdmind turns raw synthetic feedback into shareable research artifacts.
-
-![Crowdmind report preview](docs/assets/crowdmind-report-preview.svg)
 
 PDF export supports:
 
