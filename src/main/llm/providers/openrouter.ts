@@ -1,5 +1,5 @@
 import type { ChatJsonArgs, LlmProvider } from '../types'
-import { LlmError } from '../types'
+import { LlmError, hasUnsupportedFiles, normalizeAttachments } from '../types'
 import { withJsonRetry } from '../jsonRetry'
 import { fetchWithBackoff } from '../fetchWithBackoff'
 
@@ -12,12 +12,17 @@ export const openrouterProvider: LlmProvider = {
 
     return withJsonRetry('openrouter', args.schema, async (correction) => {
       const userText = correction ? `${args.user}\n\n${correction}` : args.user
-      const userContent = args.imageDataUri
-        ? [
-            { type: 'text', text: userText },
-            { type: 'image_url', image_url: { url: args.imageDataUri } }
-          ]
-        : userText
+      const attachments = normalizeAttachments(args)
+      if (hasUnsupportedFiles('openrouter', attachments)) {
+        throw new LlmError('OpenRouter en Crowdmind solo acepta imagenes como adjuntos. Usa OpenAI para analizar PDFs o archivos.', 'openrouter')
+      }
+      const userContent =
+        attachments.length > 0
+          ? [
+              { type: 'text', text: userText },
+              ...attachments.map((attachment) => ({ type: 'image_url', image_url: { url: attachment.dataUri } }))
+            ]
+          : userText
       const res = await fetchWithBackoff(ENDPOINT, {
         method: 'POST',
         headers: {

@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
 import { api } from '@renderer/lib/api'
 import { useAppStore } from '@renderer/store/useAppStore'
-import type { EstimuloTipo, EtapaFunnelDraft, ModoInteraccion, Persona } from '@shared/types'
+import type { EstimuloAttachment, EstimuloTipo, EtapaFunnelDraft, ModoInteraccion, Persona } from '@shared/types'
 import { PROVIDER_DEFAULT_MODELS, PROVIDER_LABELS } from '@shared/types'
 import { estimateTestCost } from '@shared/costEstimate'
 import { PageHeader } from '@renderer/components/PageHeader'
@@ -14,15 +14,15 @@ import { Label } from '@renderer/components/ui/label'
 import { Button } from '@renderer/components/ui/button'
 import { FunnelBuilder } from '@renderer/components/FunnelBuilder'
 import { FunnelTemplatePicker } from '@renderer/components/FunnelTemplatePicker'
-import { ImagePicker } from '@renderer/components/ImagePicker'
+import { AttachmentPicker } from '@renderer/components/AttachmentPicker'
 import { cn } from '@renderer/lib/utils'
 import { useT } from '@renderer/i18n/useT'
 
 type EstimuloMode = 'single' | 'sequence'
 
-function inferTipo(hasText: boolean, hasImage: boolean): EstimuloTipo {
-  if (hasImage && hasText) return 'multimodal'
-  if (hasImage) return 'imagen'
+function inferTipo(hasText: boolean, hasAttachments: boolean): EstimuloTipo {
+  if (hasAttachments && hasText) return 'multimodal'
+  if (hasAttachments) return 'imagen'
   return 'texto'
 }
 
@@ -36,7 +36,7 @@ export function TestConfigPage() {
   const [nombre, setNombre] = useState('')
   const [estimulo, setEstimulo] = useState('')
   const [scorecardInput, setScorecardInput] = useState('claridad, confianza, intencion de compra')
-  const [imagenDataUri, setImagenDataUri] = useState<string | null>(null)
+  const [attachments, setAttachments] = useState<EstimuloAttachment[]>([])
   const [estimuloMode, setEstimuloMode] = useState<EstimuloMode>('single')
   const [modoInteraccion, setModoInteraccion] = useState<ModoInteraccion>('individual')
   const [etapas, setEtapas] = useState<EtapaFunnelDraft[]>([
@@ -65,8 +65,9 @@ export function TestConfigPage() {
 
   const isValid =
     estimuloMode === 'single'
-      ? estimulo.trim().length > 0 || imagenDataUri !== null
-      : etapas.length > 0 && etapas.every((e) => e.estimuloContenido.trim().length > 0 || e.estimuloMetadata.imagenDataUri)
+      ? estimulo.trim().length > 0 || attachments.length > 0
+      : etapas.length > 0 &&
+        etapas.every((e) => e.estimuloContenido.trim().length > 0 || e.estimuloMetadata.imagenDataUri || (e.estimuloMetadata.attachments?.length ?? 0) > 0)
 
   const stimulusChars =
     estimuloMode === 'single' ? estimulo.length : etapas.reduce((sum, e) => sum + e.estimuloContenido.length, 0)
@@ -92,9 +93,10 @@ export function TestConfigPage() {
           workspaceId,
           panelId,
           nombre: nombre.trim() || t('testConfig.defaultTestName'),
-          estimuloTipo: inferTipo(estimulo.trim().length > 0, imagenDataUri !== null),
+          estimuloTipo: inferTipo(estimulo.trim().length > 0, attachments.length > 0),
           estimuloContenido: estimulo,
-          imagenDataUri: imagenDataUri ?? undefined,
+          imagenDataUri: attachments.find((attachment) => attachment.type === 'image')?.dataUri,
+          attachments,
           provider,
           model: model ?? undefined,
           personaIds: Array.from(selected),
@@ -187,7 +189,7 @@ export function TestConfigPage() {
               <div>
                 <Label>{t('testConfig.imageLabel')}</Label>
                 <div className="mt-1.5">
-                  <ImagePicker value={imagenDataUri} onChange={setImagenDataUri} />
+                  <AttachmentPicker value={attachments} onChange={setAttachments} />
                 </div>
               </div>
             </div>

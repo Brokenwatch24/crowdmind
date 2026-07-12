@@ -94,6 +94,21 @@ async function main() {
   assert(typeof imageRespuesta.scoreSatisfaccion === 'number', 'local provider should handle an image-attached stimulus without crashing')
   console.log(`[ok] multimodal stimulus works — local provider responded with score ${imageRespuesta.scoreSatisfaccion}/10`)
 
+  const PDF_DATA_URI = 'data:application/pdf;base64,JVBERi0xLjQKJUVPRg=='
+  const attachmentRespuesta = await getPersonaResponseToStimulus(
+    localCall,
+    listed[1],
+    'Reacciona al paquete adjunto.',
+    undefined,
+    [],
+    [
+      { id: 'smoke-image-1', type: 'image', name: 'concept.png', mimeType: 'image/png', dataUri: TINY_PNG_DATA_URI, sizeBytes: 68 },
+      { id: 'smoke-pdf-1', type: 'pdf', name: 'brief.pdf', mimeType: 'application/pdf', dataUri: PDF_DATA_URI, sizeBytes: 15 }
+    ]
+  )
+  assert(typeof attachmentRespuesta.scoreSatisfaccion === 'number', 'local provider should handle multiple attachments without crashing')
+  console.log('[ok] multi-attachment stimulus works - image + PDF accepted by the shared test path')
+
   const { indice, disclaimers } = await evaluarYGuardarConfianza(test.id, localCall, results!.respuestas)
   assert(typeof indice === 'number' && indice >= 0 && indice <= 100, `confidence index out of range: ${indice}`)
   console.log(`[ok] confidence index: ${indice}/100, ${disclaimers.length} disclaimer(s)`)

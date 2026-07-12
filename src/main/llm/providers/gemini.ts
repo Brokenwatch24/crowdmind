@@ -1,5 +1,5 @@
 import type { ChatJsonArgs, LlmProvider } from '../types'
-import { LlmError, parseDataUri } from '../types'
+import { hasUnsupportedFiles, LlmError, normalizeAttachments, parseDataUri } from '../types'
 import { withJsonRetry } from '../jsonRetry'
 import { fetchWithBackoff } from '../fetchWithBackoff'
 
@@ -10,9 +10,13 @@ export const geminiProvider: LlmProvider = {
 
     return withJsonRetry('gemini', args.schema, async (correction) => {
       const userText = correction ? `${args.user}\n\n${correction}` : args.user
+      const attachments = normalizeAttachments(args)
+      if (hasUnsupportedFiles('gemini', attachments)) {
+        throw new LlmError('Gemini en Crowdmind solo acepta imagenes como adjuntos. Usa OpenAI para analizar PDFs o archivos.', 'gemini')
+      }
       const parts: unknown[] = []
-      if (args.imageDataUri) {
-        const { mimeType, base64 } = parseDataUri(args.imageDataUri)
+      for (const attachment of attachments) {
+        const { mimeType, base64 } = parseDataUri(attachment.dataUri)
         parts.push({ inlineData: { mimeType, data: base64 } })
       }
       parts.push({ text: userText })

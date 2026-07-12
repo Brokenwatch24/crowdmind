@@ -1,5 +1,5 @@
 import type { ChatJsonArgs, LlmProvider } from '../types'
-import { LlmError, parseDataUri } from '../types'
+import { hasUnsupportedFiles, LlmError, normalizeAttachments, parseDataUri } from '../types'
 import { withJsonRetry } from '../jsonRetry'
 import { fetchWithBackoff } from '../fetchWithBackoff'
 
@@ -13,15 +13,20 @@ export const anthropicProvider: LlmProvider = {
 
     return withJsonRetry('anthropic', args.schema, async (correction) => {
       const userText = correction ? `${args.user}\n\n${correction}` : args.user
-      const userContent = args.imageDataUri
-        ? (() => {
-            const { mimeType, base64 } = parseDataUri(args.imageDataUri!)
-            return [
-              { type: 'image', source: { type: 'base64', media_type: mimeType, data: base64 } },
+      const attachments = normalizeAttachments(args)
+      if (hasUnsupportedFiles('anthropic', attachments)) {
+        throw new LlmError('Anthropic en Crowdmind solo acepta imagenes como adjuntos. Usa OpenAI para analizar PDFs o archivos.', 'anthropic')
+      }
+      const userContent =
+        attachments.length > 0
+          ? [
+              ...attachments.map((attachment) => {
+                const { mimeType, base64 } = parseDataUri(attachment.dataUri)
+                return { type: 'image', source: { type: 'base64', media_type: mimeType, data: base64 } }
+              }),
               { type: 'text', text: userText }
             ]
-          })()
-        : userText
+          : userText
       const res = await fetchWithBackoff(ENDPOINT, {
         method: 'POST',
         headers: {

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { FileText } from 'lucide-react'
 import { api } from '@renderer/lib/api'
 import type { FunnelResultSummary, NivelIngreso } from '@shared/types'
 import { NIVELES_INGRESO } from '@shared/types'
@@ -50,6 +51,20 @@ export function FunnelResultsPage() {
                 <div className="mb-3 ml-[13.5rem] font-mono-label text-[11px] font-semibold text-danger">{t('funnelResults.dropoff', { pct: `${dropPct}%` })}</div>
               )}
               {!(i > 0 && dropFromPrev > 0) && <div className="mb-3" />}
+              {(stage.etapa.estimuloMetadata.attachments?.length ?? 0) > 0 && (
+                <div className="mb-4 ml-[13.5rem] flex flex-wrap gap-2">
+                  {stage.etapa.estimuloMetadata.attachments!.map((attachment) =>
+                    attachment.type === 'image' ? (
+                      <img key={attachment.id} src={attachment.dataUri} alt={attachment.name} className="h-16 w-24 rounded border border-border object-cover" />
+                    ) : (
+                      <div key={attachment.id} className="flex h-16 w-24 flex-col items-center justify-center rounded border border-border bg-surface-2 text-text-dim">
+                        <FileText size={16} />
+                        <span className="mt-1 max-w-[5rem] truncate text-[10px]">{attachment.name}</span>
+                      </div>
+                    )
+                  )}
+                </div>
+              )}
             </div>
           )
         })}

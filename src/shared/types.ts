@@ -35,9 +35,23 @@ export const NIVELES_INGRESO: NivelIngreso[] = ['bajo', 'medio', 'alto']
 
 export type EstimuloTipo = 'texto' | 'imagen' | 'multimodal'
 
+export type EstimuloAttachmentType = 'image' | 'pdf' | 'file'
+
+/** Attachments are carried as data: URIs (base64) so tests remain local-first without external file storage. */
+export interface EstimuloAttachment {
+  id: string
+  type: EstimuloAttachmentType
+  name: string
+  mimeType: string
+  dataUri: string
+  sizeBytes: number
+}
+
 /** Image is carried as a data: URI (base64) — small enough for a single stimulus image, no file storage needed. */
 export interface EstimuloMetadata {
+  /** Legacy single-image field kept for backward compatibility with tests created before attachments. */
   imagenDataUri?: string
+  attachments?: EstimuloAttachment[]
 }
 
 export type TestTipo = 'simple' | 'funnel'

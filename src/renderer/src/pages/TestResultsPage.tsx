@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Network } from 'lucide-react'
+import { FileText, Network } from 'lucide-react'
 import { api } from '@renderer/lib/api'
 import type { TestResultSummary } from '@shared/types'
 import { PageHeader } from '@renderer/components/PageHeader'
@@ -50,13 +50,42 @@ export function TestResultsPage() {
         }
       />
 
-      {summary.test.estimuloMetadata.imagenDataUri && (
-        <img
-          src={summary.test.estimuloMetadata.imagenDataUri}
-          alt={t('testResults.imageAlt')}
-          className="mb-4 max-h-52 rounded-card border border-border object-cover"
-        />
-      )}
+      {(() => {
+        const attachments =
+          summary.test.estimuloMetadata.attachments ??
+          (summary.test.estimuloMetadata.imagenDataUri
+            ? [
+                {
+                  id: 'legacy-image',
+                  type: 'image' as const,
+                  name: t('testResults.imageAlt'),
+                  mimeType: 'image/png',
+                  dataUri: summary.test.estimuloMetadata.imagenDataUri,
+                  sizeBytes: 0
+                }
+              ]
+            : [])
+        if (attachments.length === 0) return null
+        return (
+          <div className="mb-4 flex max-w-4xl flex-wrap gap-2">
+            {attachments.map((attachment) =>
+              attachment.type === 'image' ? (
+                <img
+                  key={attachment.id}
+                  src={attachment.dataUri}
+                  alt={attachment.name}
+                  className="h-28 w-36 rounded-card border border-border object-cover"
+                />
+              ) : (
+                <div key={attachment.id} className="flex h-28 w-36 flex-col items-center justify-center rounded-card border border-border bg-surface text-text-dim">
+                  <FileText size={22} />
+                  <div className="mt-2 max-w-[7rem] truncate text-xs">{attachment.name}</div>
+                </div>
+              )
+            )}
+          </div>
+        )
+      })()}
 
       <div className="grid max-w-4xl grid-cols-1 gap-3 sm:grid-cols-3">
         <Card className="p-4">

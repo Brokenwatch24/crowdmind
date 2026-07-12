@@ -199,7 +199,7 @@ export const en: Record<keyof typeof es, string> = {
   'testConfig.namePlaceholder': 'E.g. Q3 Launch',
   'testConfig.stimulusLabel': 'Stimulus (text)',
   'testConfig.stimulusPlaceholder': 'Describe the ad, product or message you want to test…',
-  'testConfig.imageLabel': 'Image (optional)',
+  'testConfig.imageLabel': 'Attachments (optional)',
   'testConfig.scorecardLabel': 'Scorecard (comma-separated criteria)',
   'testConfig.scorecardPlaceholder': 'clarity, trust, purchase intent, price',
   'testConfig.stagesLabel': 'Funnel stages',
@@ -228,6 +228,12 @@ export const en: Record<keyof typeof es, string> = {
   // Image picker
   'imagePicker.attach': 'Attach image',
   'imagePicker.stimulusAlt': 'Visual stimulus',
+  'attachmentPicker.attach': 'Attach',
+  'attachmentPicker.hint': 'PNG/JPG/WEBP/GIF images or PDFs. Maximum 20 files and 50 MB per test.',
+  'attachmentPicker.remove': 'Remove attachment',
+  'attachmentPicker.tooMany': 'Too many files (max {{max}}).',
+  'attachmentPicker.tooLarge': 'Attachments exceed the {{max}} limit.',
+  'attachmentPicker.readError': 'Could not read one of the files.',
 
   // Test results
   'testResults.eyebrow': 'PANEL > TEST',

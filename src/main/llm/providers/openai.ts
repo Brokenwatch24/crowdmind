@@ -1,5 +1,5 @@
 import type { ChatJsonArgs, LlmProvider } from '../types'
-import { LlmError } from '../types'
+import { LlmError, normalizeAttachments } from '../types'
 import { withJsonRetry } from '../jsonRetry'
 import { fetchWithBackoff } from '../fetchWithBackoff'
 
@@ -12,12 +12,18 @@ export const openaiProvider: LlmProvider = {
 
     return withJsonRetry('openai', args.schema, async (correction) => {
       const userText = correction ? `${args.user}\n\n${correction}` : args.user
-      const userContent = args.imageDataUri
-        ? [
-            { type: 'text', text: userText },
-            { type: 'image_url', image_url: { url: args.imageDataUri } }
-          ]
-        : userText
+      const attachments = normalizeAttachments(args)
+      const userContent =
+        attachments.length > 0
+          ? [
+              { type: 'text', text: userText },
+              ...attachments.map((attachment) =>
+                attachment.type === 'image'
+                  ? { type: 'image_url', image_url: { url: attachment.dataUri } }
+                  : { type: 'file', file: { filename: attachment.name, file_data: attachment.dataUri } }
+              )
+            ]
+          : userText
       const res = await fetchWithBackoff(ENDPOINT, {
         method: 'POST',
         headers: {

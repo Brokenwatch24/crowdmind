@@ -4,7 +4,7 @@ import type { EstimuloTipo, EtapaFunnelDraft } from '@shared/types'
 import { Input } from '@renderer/components/ui/input'
 import { Textarea } from '@renderer/components/ui/textarea'
 import { Label } from '@renderer/components/ui/label'
-import { ImagePicker } from '@renderer/components/ImagePicker'
+import { AttachmentPicker } from '@renderer/components/AttachmentPicker'
 import { cn } from '@renderer/lib/utils'
 import { useT } from '@renderer/i18n/useT'
 
@@ -12,9 +12,9 @@ function emptyStage(orden: number): EtapaFunnelDraft {
   return { orden, tipoEstimulo: 'texto', estimuloContenido: '', estimuloMetadata: {}, titulo: `Etapa ${orden + 1}` }
 }
 
-function inferTipo(hasText: boolean, hasImage: boolean): EstimuloTipo {
-  if (hasImage && hasText) return 'multimodal'
-  if (hasImage) return 'imagen'
+function inferTipo(hasText: boolean, hasAttachments: boolean): EstimuloTipo {
+  if (hasAttachments && hasText) return 'multimodal'
+  if (hasAttachments) return 'imagen'
   return 'texto'
 }
 
@@ -41,7 +41,13 @@ export function FunnelBuilder({
       etapas.map((e, i) => {
         if (i !== index) return e
         const next = { ...e, ...patch }
-        return { ...next, tipoEstimulo: inferTipo(next.estimuloContenido.trim().length > 0, Boolean(next.estimuloMetadata.imagenDataUri)) }
+        return {
+          ...next,
+          tipoEstimulo: inferTipo(
+            next.estimuloContenido.trim().length > 0,
+            Boolean(next.estimuloMetadata.imagenDataUri) || (next.estimuloMetadata.attachments?.length ?? 0) > 0
+          )
+        }
       })
     )
   }
@@ -136,9 +142,16 @@ export function FunnelBuilder({
             placeholder={t('funnelBuilder.stagePlaceholder')}
           />
           <div className="mt-2.5">
-            <ImagePicker
-              value={etapa.estimuloMetadata.imagenDataUri ?? null}
-              onChange={(dataUri) => update(i, { estimuloMetadata: dataUri ? { imagenDataUri: dataUri } : {} })}
+            <AttachmentPicker
+              value={etapa.estimuloMetadata.attachments ?? []}
+              onChange={(attachments) =>
+                update(i, {
+                  estimuloMetadata: {
+                    attachments,
+                    imagenDataUri: attachments.find((attachment) => attachment.type === 'image')?.dataUri
+                  }
+                })
+              }
             />
           </div>
         </div>

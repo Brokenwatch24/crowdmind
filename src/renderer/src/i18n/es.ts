@@ -197,7 +197,7 @@ export const es = {
   'testConfig.namePlaceholder': 'Ej. Lanzamiento Q3',
   'testConfig.stimulusLabel': 'Estímulo (texto)',
   'testConfig.stimulusPlaceholder': 'Describe el anuncio, producto o mensaje que quieres testear…',
-  'testConfig.imageLabel': 'Imagen (opcional)',
+  'testConfig.imageLabel': 'Adjuntos (opcional)',
   'testConfig.scorecardLabel': 'Scorecard (criterios separados por coma)',
   'testConfig.scorecardPlaceholder': 'claridad, confianza, intencion de compra, precio',
   'testConfig.stagesLabel': 'Etapas del funnel',
@@ -226,6 +226,12 @@ export const es = {
   // Image picker
   'imagePicker.attach': 'Adjuntar imagen',
   'imagePicker.stimulusAlt': 'Estímulo visual',
+  'attachmentPicker.attach': 'Adjuntar',
+  'attachmentPicker.hint': 'Imagenes PNG/JPG/WEBP/GIF o PDFs. Maximo 20 archivos y 50 MB por test.',
+  'attachmentPicker.remove': 'Quitar adjunto',
+  'attachmentPicker.tooMany': 'Demasiados archivos (max. {{max}}).',
+  'attachmentPicker.tooLarge': 'Los adjuntos superan el limite de {{max}}.',
+  'attachmentPicker.readError': 'No se pudo leer uno de los archivos.',
 
   // Test results
   'testResults.eyebrow': 'PANEL > TEST',

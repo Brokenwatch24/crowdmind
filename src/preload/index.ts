@@ -8,6 +8,7 @@ import type {
   ComparacionResult,
   CsvColumnMapping,
   CsvPreview,
+  EstimuloAttachment,
   EstimuloTipo,
   EtapaFunnelDraft,
   FollowUp,
@@ -96,6 +97,7 @@ const api = {
       estimuloTipo?: EstimuloTipo
       estimuloContenido: string
       imagenDataUri?: string
+      attachments?: EstimuloAttachment[]
       provider: ProviderId
       model?: string
       personaIds?: string[]

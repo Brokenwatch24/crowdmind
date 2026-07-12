@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron'
 import { IPC } from '@shared/ipcChannels'
-import type { EstimuloTipo, ProviderId } from '@shared/types'
+import type { EstimuloAttachment, EstimuloTipo, ProviderId } from '@shared/types'
 import * as testsRepo from '../db/repo/tests'
 import * as personasRepo from '../db/repo/personas'
 import { getLatestPersonaVersionId } from '../db/repo/personaVersions'
@@ -28,19 +28,24 @@ export function registerTestHandlers(): void {
         estimuloTipo?: EstimuloTipo
         estimuloContenido: string
         imagenDataUri?: string
+        attachments?: EstimuloAttachment[]
         provider: ProviderId
         model?: string
         personaIds?: string[]
         scorecardCriteria?: string[]
       }
     ) => {
+      const attachments = input.attachments ?? []
       const test = testsRepo.createTest({
         workspaceId: input.workspaceId,
         panelId: input.panelId,
         nombre: input.nombre,
         estimuloTipo: input.estimuloTipo ?? 'texto',
         estimuloContenido: input.estimuloContenido,
-        estimuloMetadata: input.imagenDataUri ? { imagenDataUri: input.imagenDataUri } : {},
+        estimuloMetadata: {
+          ...(input.imagenDataUri ? { imagenDataUri: input.imagenDataUri } : {}),
+          ...(attachments.length > 0 ? { attachments } : {})
+        },
         scorecardCriteria: input.scorecardCriteria ?? []
       })
 
@@ -56,7 +61,8 @@ export function registerTestHandlers(): void {
             persona,
             input.estimuloContenido,
             input.imagenDataUri,
-            input.scorecardCriteria ?? []
+            input.scorecardCriteria ?? [],
+            attachments
           )
           testsRepo.saveRespuesta({
             testId: test.id,

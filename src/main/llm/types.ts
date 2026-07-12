@@ -1,5 +1,7 @@
 import type { ZodType } from 'zod'
-import type { ProviderId } from '@shared/types'
+import type { EstimuloAttachment, ProviderId } from '@shared/types'
+
+export type LlmAttachment = Pick<EstimuloAttachment, 'type' | 'name' | 'mimeType' | 'dataUri' | 'sizeBytes'>
 
 export interface ChatJsonArgs<T> {
   apiKey: string | null
@@ -11,6 +13,7 @@ export interface ChatJsonArgs<T> {
   shapeHint: string
   /** Optional stimulus image as a data: URI (base64) — sent as a vision attachment when present. */
   imageDataUri?: string
+  attachments?: LlmAttachment[]
 }
 
 export interface ParsedDataUri {
@@ -23,6 +26,25 @@ export function parseDataUri(dataUri: string): ParsedDataUri {
   const match = /^data:([^;]+);base64,(.+)$/s.exec(dataUri)
   if (!match) throw new Error('Formato de imagen inválido — se esperaba un data URI base64.')
   return { mimeType: match[1], base64: match[2] }
+}
+
+export function normalizeAttachments(args: { imageDataUri?: string; attachments?: LlmAttachment[] }): LlmAttachment[] {
+  const attachments = [...(args.attachments ?? [])]
+  if (args.imageDataUri && !attachments.some((a) => a.dataUri === args.imageDataUri)) {
+    attachments.unshift({
+      type: 'image',
+      name: 'stimulus-image',
+      mimeType: 'image/png',
+      dataUri: args.imageDataUri,
+      sizeBytes: 0
+    })
+  }
+  return attachments
+}
+
+export function hasUnsupportedFiles(provider: ProviderId, attachments: LlmAttachment[]): boolean {
+  if (provider === 'openai' || provider === 'local') return false
+  return attachments.some((attachment) => attachment.type !== 'image')
 }
 
 export interface LlmProvider {

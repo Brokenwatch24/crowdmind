@@ -31,7 +31,7 @@ export function personaSystemPrompt(persona: Persona): string {
 export function testStimulusUserPrompt(estimulo: string, tieneImagen = false): string {
   return [
     tieneImagen
-      ? 'Este es el estímulo que se te presenta — analiza también la imagen adjunta (puede ser un anuncio, producto, empaque o landing page):'
+      ? 'Este es el estimulo que se te presenta. Analiza tambien los adjuntos enviados (imagenes, PDFs o archivos relevantes):'
       : 'Este es el estímulo que se te presenta (puede ser un anuncio, producto, mensaje o landing page):',
     estimulo ? `"${estimulo}"` : '',
     '',
@@ -107,7 +107,11 @@ export function funnelStageUserPrompt(etapa: EtapaFunnel, historialPropio: Etapa
   return [
     historial ? `Así reaccionaste en las etapas anteriores de este mismo recorrido:\n${historial}\n` : 'Esta es la primera etapa del recorrido.',
     peerSummary ? `\nAsí han reaccionado otras personas del panel en esta misma etapa hasta ahora:\n${peerSummary}\n` : '',
-    `\nEtapa actual — "${etapa.titulo}"${etapa.estimuloMetadata.imagenDataUri ? ' (analiza también la imagen adjunta)' : ''}:`,
+    `\nEtapa actual — "${etapa.titulo}"${
+      etapa.estimuloMetadata.imagenDataUri || (etapa.estimuloMetadata.attachments?.length ?? 0) > 0
+        ? ' (analiza tambien los adjuntos enviados)'
+        : ''
+    }:`,
     etapa.estimuloContenido ? `"${etapa.estimuloContenido}"` : '',
     '',
     'Reacciona como lo harías tú. Da tu opinión, un puntaje de satisfacción del 1 al 10, aspectos positivos, objeciones si las tienes,',

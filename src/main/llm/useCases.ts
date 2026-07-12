@@ -1,4 +1,13 @@
-import type { ChatMensaje, EtapaFunnel, Persona, PersonaDraft, PersonaGenerationInput, ProviderId, RespuestaConPersona } from '@shared/types'
+import type {
+  ChatMensaje,
+  EstimuloAttachment,
+  EtapaFunnel,
+  Persona,
+  PersonaDraft,
+  PersonaGenerationInput,
+  ProviderId,
+  RespuestaConPersona
+} from '@shared/types'
 import { providerRegistry } from './providerRegistry'
 import { generatePersonasLocal } from './local/personaGenerator'
 import { respondToStimulusLocal, type LocalRespuesta } from './local/testResponder'
@@ -73,6 +82,10 @@ function normalizeGeneratedPersona(p: Omit<PersonaDraft, 'llmProviderOverride' |
   return { ...p, llmProviderOverride: null, llmModelOverride: null }
 }
 
+function hasVisualContext(attachments: EstimuloAttachment[] = [], imageDataUri?: string): boolean {
+  return Boolean(imageDataUri) || attachments.length > 0
+}
+
 export async function generatePersonasWithAi(
   call: ProviderCall,
   inputOrBrief: PersonaGenerationInput | string,
@@ -142,19 +155,22 @@ export async function getPersonaResponseToStimulus(
   persona: Persona,
   estimulo: string,
   imageDataUri?: string,
-  scorecardCriteria: string[] = []
+  scorecardCriteria: string[] = [],
+  attachments: EstimuloAttachment[] = []
 ): Promise<LocalRespuesta> {
+  const hasAttachments = hasVisualContext(attachments, imageDataUri)
   if (call.provider === 'local') {
-    return respondToStimulusLocal(persona, estimulo, Boolean(imageDataUri), scorecardCriteria)
+    return respondToStimulusLocal(persona, estimulo, hasAttachments, scorecardCriteria)
   }
   const result = await providerRegistry[call.provider].chatJson({
     apiKey: call.apiKey,
     model: call.model,
     system: personaSystemPrompt(persona),
-    user: testStimulusUserPromptWithScorecard(estimulo, Boolean(imageDataUri), scorecardCriteria),
+    user: testStimulusUserPromptWithScorecard(estimulo, hasAttachments, scorecardCriteria),
     schema: testResponseSchema,
     shapeHint: TEST_RESPONSE_SHAPE_HINT,
-    imageDataUri
+    imageDataUri,
+    attachments
   })
   return { ...result, scorecardScores: result.scorecardScores ?? {} }
 }
@@ -207,6 +223,7 @@ export async function getFunnelStageResponse(
   peerSummary?: string,
   scorecardCriteria: string[] = []
 ): Promise<LocalFunnelRespuesta> {
+  const attachments = etapa.estimuloMetadata.attachments ?? []
   if (call.provider === 'local') {
     return funnelStageResponseLocal(persona, etapa, historialPropio, peerSummary, scorecardCriteria)
   }
@@ -217,7 +234,8 @@ export async function getFunnelStageResponse(
     user: funnelStageUserPromptWithScorecard(etapa, historialPropio, peerSummary, scorecardCriteria),
     schema: funnelStageResponseSchema,
     shapeHint: FUNNEL_STAGE_RESPONSE_SHAPE_HINT,
-    imageDataUri: etapa.estimuloMetadata.imagenDataUri
+    imageDataUri: etapa.estimuloMetadata.imagenDataUri,
+    attachments
   })
   return { ...result, scorecardScores: result.scorecardScores ?? {} }
 }
