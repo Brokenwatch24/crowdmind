@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Plus } from 'lucide-react'
+import { Plus, Trash2 } from 'lucide-react'
 import { api } from '@renderer/lib/api'
 import { useAppStore } from '@renderer/store/useAppStore'
 import type { Workspace } from '@shared/types'
@@ -14,6 +14,8 @@ export function WorkspaceSwitcher() {
   const [workspaces, setWorkspaces] = useState<Workspace[]>([])
   const [loading, setLoading] = useState(true)
   const [open, setOpen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [newName, setNewName] = useState('')
   const currentWorkspaceId = useAppStore((s) => s.currentWorkspaceId)
   const setCurrentWorkspaceId = useAppStore((s) => s.setCurrentWorkspaceId)
@@ -43,6 +45,21 @@ export function WorkspaceSwitcher() {
     setOpen(false)
     await refresh(ws.id)
   }
+
+  async function handleDeleteCurrent() {
+    if (!currentWorkspaceId) return
+    setDeleting(true)
+    try {
+      await api.workspaces.delete(currentWorkspaceId)
+      setDeleteOpen(false)
+      setCurrentWorkspaceId(null)
+      await refresh()
+    } finally {
+      setDeleting(false)
+    }
+  }
+
+  const currentWorkspace = workspaces.find((w) => w.id === currentWorkspaceId)
 
   return (
     <div className="rounded-lg border border-border bg-surface p-3">
@@ -91,6 +108,29 @@ export function WorkspaceSwitcher() {
           </div>
         </DialogContent>
       </Dialog>
+      {currentWorkspace && (
+        <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+          <DialogTrigger asChild>
+            <button className="mt-2 flex items-center gap-1 text-[11px] font-medium text-danger">
+              <Trash2 size={12} /> {t('workspaceSwitcher.delete')}
+            </button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogTitle>{t('workspaceSwitcher.deleteTitle')}</DialogTitle>
+            <div className="space-y-4">
+              <p className="text-sm text-text-muted">{t('workspaceSwitcher.deleteConfirm', { name: currentWorkspace.nombre })}</p>
+              <div className="flex justify-end gap-2">
+                <Button variant="secondary" onClick={() => setDeleteOpen(false)} disabled={deleting}>
+                  {t('personaDetail.cancel')}
+                </Button>
+                <Button onClick={handleDeleteCurrent} disabled={deleting}>
+                  {deleting ? t('workspaceSwitcher.deleting') : t('workspaceSwitcher.delete')}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   )
 }

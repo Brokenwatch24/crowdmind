@@ -11,6 +11,7 @@ import { SwarmPage } from '@renderer/pages/SwarmPage'
 import { ComparisonPage } from '@renderer/pages/ComparisonPage'
 import { PanelTimelinePage } from '@renderer/pages/PanelTimelinePage'
 import { SettingsPage } from '@renderer/pages/SettingsPage'
+import { WorkspaceNotesPage } from '@renderer/pages/WorkspaceNotesPage'
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/w/:workspaceId/panels" element={<PanelsPage />} />
         <Route path="/w/:workspaceId/comparisons" element={<ComparisonPage />} />
+        <Route path="/w/:workspaceId/notes" element={<WorkspaceNotesPage />} />
         <Route path="/w/:workspaceId/panels/:panelId" element={<PanelDetailPage />} />
         <Route path="/w/:workspaceId/panels/:panelId/timeline" element={<PanelTimelinePage />} />
         <Route path="/w/:workspaceId/panels/:panelId/personas/:personaId" element={<PersonaDetailPage />} />

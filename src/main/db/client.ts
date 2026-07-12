@@ -12,6 +12,17 @@ CREATE TABLE IF NOT EXISTS workspaces (
   created_at INTEGER NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS notes (
+  id TEXT PRIMARY KEY,
+  scope_type TEXT NOT NULL,
+  scope_id TEXT NOT NULL,
+  title TEXT NOT NULL,
+  content_markdown TEXT NOT NULL DEFAULT '',
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS notes_scope_idx ON notes (scope_type, scope_id);
+
 CREATE TABLE IF NOT EXISTS provider_settings (
   id TEXT PRIMARY KEY,
   workspace_id TEXT,

@@ -50,6 +50,18 @@ export interface Workspace {
   createdAt: number
 }
 
+export type NoteScopeType = 'workspace' | 'panel' | 'test'
+
+export interface Note {
+  id: string
+  scopeType: NoteScopeType
+  scopeId: string
+  title: string
+  contentMarkdown: string
+  createdAt: number
+  updatedAt: number
+}
+
 export interface ProviderSetting {
   id: string
   workspaceId: string | null

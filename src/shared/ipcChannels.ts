@@ -5,6 +5,11 @@ export const IPC = {
   workspacesDelete: 'workspaces:delete',
   workspacesSeedDemo: 'workspaces:seedDemo',
 
+  notesList: 'notes:list',
+  notesCreate: 'notes:create',
+  notesUpdate: 'notes:update',
+  notesDelete: 'notes:delete',
+
   panelsList: 'panels:list',
   panelsGet: 'panels:get',
   panelsCreate: 'panels:create',

@@ -17,6 +17,8 @@ import type {
   InterviewPersonaResult,
   MarketplacePanelTemplate,
   ModoInteraccion,
+  Note,
+  NoteScopeType,
   Panel,
   PanelTimelinePoint,
   Persona,
@@ -39,6 +41,14 @@ const api = {
     rename: (id: string, nombre: string): Promise<Workspace> => ipcRenderer.invoke(IPC.workspacesRename, id, nombre),
     delete: (id: string): Promise<void> => ipcRenderer.invoke(IPC.workspacesDelete, id),
     seedDemo: (): Promise<Workspace> => ipcRenderer.invoke(IPC.workspacesSeedDemo)
+  },
+  notes: {
+    list: (input: { scopeType: NoteScopeType; scopeId: string }): Promise<Note[]> => ipcRenderer.invoke(IPC.notesList, input),
+    create: (input: { scopeType: NoteScopeType; scopeId: string; title: string; contentMarkdown: string }): Promise<Note> =>
+      ipcRenderer.invoke(IPC.notesCreate, input),
+    update: (id: string, patch: Partial<{ title: string; contentMarkdown: string }>): Promise<Note> =>
+      ipcRenderer.invoke(IPC.notesUpdate, id, patch),
+    delete: (id: string): Promise<void> => ipcRenderer.invoke(IPC.notesDelete, id)
   },
   panels: {
     list: (workspaceId: string): Promise<Panel[]> => ipcRenderer.invoke(IPC.panelsList, workspaceId),

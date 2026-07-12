@@ -7,6 +7,7 @@ export const en: Record<keyof typeof es, string> = {
   // Nav / shell
   'nav.paneles': 'Panels',
   'nav.comparar': 'Compare',
+  'nav.notes': 'Notes',
   'nav.ajustes': 'Settings',
   'shell.tagline': 'Crowdmind',
 
@@ -24,6 +25,10 @@ export const en: Record<keyof typeof es, string> = {
   'workspaceSwitcher.nameLabel': 'Name',
   'workspaceSwitcher.namePlaceholder': 'E.g. Damory Foods LatAm',
   'workspaceSwitcher.create': 'Create workspace',
+  'workspaceSwitcher.delete': 'Delete workspace',
+  'workspaceSwitcher.deleteTitle': 'Delete workspace',
+  'workspaceSwitcher.deleteConfirm': 'This will delete {{name}} and all of its panels, personas, tests and notes. This action cannot be undone.',
+  'workspaceSwitcher.deleting': 'Deleting...',
 
   // Panels
   'panels.eyebrow': 'WORKSPACE',
@@ -59,6 +64,21 @@ export const en: Record<keyof typeof es, string> = {
   'panelDetail.newTest': 'New test',
   'panelDetail.testsEmptyNoPersonas': 'Add personas before running a test.',
   'panelDetail.testsEmpty': 'No tests in this panel yet.',
+  'panelDetail.delete': 'Delete panel',
+  'panelDetail.deleteTitle': 'Delete panel',
+  'panelDetail.deleteConfirm': 'This will delete {{name}} with its personas, tests and notes. This action cannot be undone.',
+  'panelDetail.deleting': 'Deleting...',
+
+  // Notes
+  'notes.tab': 'Notes',
+  'notes.eyebrow': 'WORKSPACE',
+  'notes.workspaceTitle': 'Notes and analysis',
+  'notes.testTitle': 'Custom notes / analysis',
+  'notes.new': 'New note',
+  'notes.empty': 'No notes yet.',
+  'notes.defaultTitle': 'Custom analysis',
+  'notes.edit': 'Edit',
+  'notes.preview': 'Preview',
 
   // Interview
   'interview.button': 'Interview',

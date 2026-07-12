@@ -3,6 +3,8 @@ import { getDb } from '../client'
 import { workspaces } from '../schema'
 import { newId, now } from '../ids'
 import type { Workspace } from '@shared/types'
+import { listPanels, deletePanel } from './panels'
+import { deleteNotesForScope } from './notes'
 
 function toWorkspace(row: typeof workspaces.$inferSelect): Workspace {
   return { id: row.id, nombre: row.nombre, createdAt: row.createdAt }
@@ -27,5 +29,9 @@ export function renameWorkspace(id: string, nombre: string): Workspace {
 }
 
 export function deleteWorkspace(id: string): void {
+  for (const panel of listPanels(id)) {
+    deletePanel(panel.id)
+  }
+  deleteNotesForScope('workspace', id)
   getDb().delete(workspaces).where(eq(workspaces.id, id)).run()
 }

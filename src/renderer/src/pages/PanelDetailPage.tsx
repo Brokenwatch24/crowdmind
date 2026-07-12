@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Plus, FlaskConical, TrendingUp } from 'lucide-react'
+import { Plus, FlaskConical, TrendingUp, Trash2 } from 'lucide-react'
 import { api } from '@renderer/lib/api'
 import type { CrowdmindTest, Panel, Persona } from '@shared/types'
 import { PageHeader } from '@renderer/components/PageHeader'
@@ -15,6 +15,7 @@ import { GenerateWithAiDialog } from '@renderer/components/GenerateWithAiDialog'
 import { CsvImportDialog } from '@renderer/components/CsvImportDialog'
 import { InterviewDialog } from '@renderer/components/InterviewDialog'
 import { ExportPanelDialog } from '@renderer/components/ExportPanelDialog'
+import { NotesSection } from '@renderer/components/NotesSection'
 import { formatDate } from '@renderer/lib/utils'
 import { useT } from '@renderer/i18n/useT'
 
@@ -32,6 +33,8 @@ export function PanelDetailPage() {
   const [personas, setPersonas] = useState<Persona[]>([])
   const [tests, setTests] = useState<CrowdmindTest[]>([])
   const [newPersonaOpen, setNewPersonaOpen] = useState(false)
+  const [deletePanelOpen, setDeletePanelOpen] = useState(false)
+  const [deletingPanel, setDeletingPanel] = useState(false)
   const t = useT()
 
   async function refreshAll() {
@@ -49,6 +52,17 @@ export function PanelDetailPage() {
 
   if (!workspaceId || !panelId) return null
 
+  async function handleDeletePanel() {
+    if (!workspaceId || !panelId) return
+    setDeletingPanel(true)
+    try {
+      await api.panels.delete(panelId)
+      navigate(`/w/${workspaceId}/panels`)
+    } finally {
+      setDeletingPanel(false)
+    }
+  }
+
   return (
     <div className="p-8">
       <PageHeader
@@ -60,6 +74,27 @@ export function PanelDetailPage() {
               <TrendingUp size={14} /> {t('panelDetail.evolution')}
             </Button>
             <ExportPanelDialog panelId={panelId} />
+            <Dialog open={deletePanelOpen} onOpenChange={setDeletePanelOpen}>
+              <DialogTrigger asChild>
+                <Button variant="secondary" size="sm">
+                  <Trash2 size={14} /> {t('panelDetail.delete')}
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogTitle>{t('panelDetail.deleteTitle')}</DialogTitle>
+                <div className="space-y-4">
+                  <p className="text-sm text-text-muted">{t('panelDetail.deleteConfirm', { name: panel?.nombre ?? '' })}</p>
+                  <div className="flex justify-end gap-2">
+                    <Button variant="secondary" onClick={() => setDeletePanelOpen(false)} disabled={deletingPanel}>
+                      {t('personaDetail.cancel')}
+                    </Button>
+                    <Button onClick={handleDeletePanel} disabled={deletingPanel}>
+                      {deletingPanel ? t('panelDetail.deleting') : t('panelDetail.delete')}
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </>
         }
       />
@@ -68,6 +103,7 @@ export function PanelDetailPage() {
         <TabsList>
           <TabsTrigger value="personas">{t('panelDetail.tabPersonas')} ({personas.length})</TabsTrigger>
           <TabsTrigger value="tests">{t('panelDetail.tabTests')} ({tests.length})</TabsTrigger>
+          <TabsTrigger value="notes">{t('notes.tab')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="personas">
@@ -168,6 +204,10 @@ export function PanelDetailPage() {
               ))}
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="notes">
+          <NotesSection scopeType="panel" scopeId={panelId} />
         </TabsContent>
       </Tabs>
     </div>

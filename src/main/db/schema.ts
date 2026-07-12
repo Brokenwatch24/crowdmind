@@ -6,6 +6,16 @@ export const workspaces = sqliteTable('workspaces', {
   createdAt: integer('created_at').notNull()
 })
 
+export const notes = sqliteTable('notes', {
+  id: text('id').primaryKey(),
+  scopeType: text('scope_type').notNull(),
+  scopeId: text('scope_id').notNull(),
+  title: text('title').notNull(),
+  contentMarkdown: text('content_markdown').notNull().default(''),
+  createdAt: integer('created_at').notNull(),
+  updatedAt: integer('updated_at').notNull()
+})
+
 export const providerSettings = sqliteTable('provider_settings', {
   id: text('id').primaryKey(),
   workspaceId: text('workspace_id'),

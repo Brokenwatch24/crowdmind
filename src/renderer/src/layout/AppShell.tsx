@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom'
-import { LayoutGrid, Settings, GitCompare } from 'lucide-react'
+import { LayoutGrid, Settings, GitCompare, FileText } from 'lucide-react'
 import { cn } from '@renderer/lib/utils'
 import { Logo } from './Logo'
 import { WorkspaceSwitcher } from './WorkspaceSwitcher'
@@ -38,6 +38,7 @@ export function AppShell() {
         <nav className="flex flex-col gap-1">
           <NavItem to={currentWorkspaceId ? `/w/${currentWorkspaceId}/panels` : '/workspaces'} icon={LayoutGrid} label={t('nav.paneles')} />
           {currentWorkspaceId && <NavItem to={`/w/${currentWorkspaceId}/comparisons`} icon={GitCompare} label={t('nav.comparar')} />}
+          {currentWorkspaceId && <NavItem to={`/w/${currentWorkspaceId}/notes`} icon={FileText} label={t('nav.notes')} />}
           <NavItem to="/settings" icon={Settings} label={t('nav.ajustes')} />
         </nav>
         <div className="mt-auto">

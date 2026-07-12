@@ -52,3 +52,48 @@ body {
 .font-mono-label {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
+
+.prose-notes h1,
+.prose-notes h2,
+.prose-notes h3 {
+  color: var(--color-text);
+  font-weight: 650;
+  margin: 0.8rem 0 0.35rem;
+}
+
+.prose-notes h1 {
+  font-size: 1.15rem;
+}
+
+.prose-notes h2 {
+  font-size: 1rem;
+}
+
+.prose-notes h3 {
+  font-size: 0.9rem;
+}
+
+.prose-notes p {
+  margin: 0.35rem 0;
+}
+
+.prose-notes ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+  margin: 0.5rem 0;
+}
+
+.prose-notes blockquote {
+  border-left: 2px solid var(--color-primary);
+  padding-left: 0.8rem;
+  color: var(--color-text);
+  margin: 0.6rem 0;
+}
+
+.prose-notes code {
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-surface);
+  padding: 0.05rem 0.25rem;
+  color: var(--color-text);
+}

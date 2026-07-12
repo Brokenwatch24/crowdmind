@@ -11,6 +11,7 @@ import { Button } from '@renderer/components/ui/button'
 import { ConfidenceBadge } from '@renderer/components/ConfidenceBadge'
 import { ThemesSection } from '@renderer/components/ThemesSection'
 import { ExportDialog } from '@renderer/components/ExportDialog'
+import { NotesSection } from '@renderer/components/NotesSection'
 import { useT } from '@renderer/i18n/useT'
 
 export function TestResultsPage() {
@@ -175,6 +176,11 @@ export function TestResultsPage() {
           personasById={new Map(summary.respuestas.map((r) => [r.personaId, r.persona]))}
         />
       )}
+
+      <div className="mt-8">
+        <div className="mb-3 text-sm font-medium text-text-muted">{t('notes.testTitle')}</div>
+        <NotesSection scopeType="test" scopeId={summary.test.id} />
+      </div>
     </div>
   )
 }

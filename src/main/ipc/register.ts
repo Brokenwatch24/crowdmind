@@ -13,6 +13,7 @@ import { registerTimelineHandlers } from './timeline'
 import { registerExportHandlers } from './exportReport'
 import { registerMarketplaceHandlers } from './marketplace'
 import { registerUpdateHandlers } from './update'
+import { registerNoteHandlers } from './notes'
 
 export function registerIpcHandlers(): void {
   registerWorkspaceHandlers()
@@ -30,4 +31,5 @@ export function registerIpcHandlers(): void {
   registerExportHandlers()
   registerMarketplaceHandlers()
   registerUpdateHandlers()
+  registerNoteHandlers()
 }

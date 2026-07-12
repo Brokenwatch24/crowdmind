@@ -1,8 +1,9 @@
 import { eq, sql } from 'drizzle-orm'
 import { getDb } from '../client'
-import { paneles, personas } from '../schema'
+import { paneles, personas, tests, respuestas } from '../schema'
 import { newId, now } from '../ids'
 import type { Panel } from '@shared/types'
+import { deleteNotesForScope } from './notes'
 
 function toPanel(row: typeof paneles.$inferSelect, personaCount = 0): Panel {
   return {
@@ -66,6 +67,13 @@ export function updatePanel(
 }
 
 export function deletePanel(id: string): void {
+  const panelTests = getDb().select().from(tests).where(eq(tests.panelId, id)).all()
+  for (const test of panelTests) {
+    getDb().delete(respuestas).where(eq(respuestas.testId, test.id)).run()
+    deleteNotesForScope('test', test.id)
+  }
+  getDb().delete(tests).where(eq(tests.panelId, id)).run()
   getDb().delete(personas).where(eq(personas.panelId, id)).run()
+  deleteNotesForScope('panel', id)
   getDb().delete(paneles).where(eq(paneles.id, id)).run()
 }

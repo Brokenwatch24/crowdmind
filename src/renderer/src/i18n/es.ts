@@ -5,6 +5,7 @@ export const es = {
   // Nav / shell
   'nav.paneles': 'Paneles',
   'nav.comparar': 'Comparar',
+  'nav.notes': 'Notas',
   'nav.ajustes': 'Ajustes',
   'shell.tagline': 'Crowdmind',
 
@@ -22,6 +23,10 @@ export const es = {
   'workspaceSwitcher.nameLabel': 'Nombre',
   'workspaceSwitcher.namePlaceholder': 'Ej. Damory Foods LatAm',
   'workspaceSwitcher.create': 'Crear workspace',
+  'workspaceSwitcher.delete': 'Eliminar workspace',
+  'workspaceSwitcher.deleteTitle': 'Eliminar workspace',
+  'workspaceSwitcher.deleteConfirm': 'Esto eliminara {{name}} y todos sus paneles, personas, tests y notas. Esta accion no se puede deshacer.',
+  'workspaceSwitcher.deleting': 'Eliminando...',
 
   // Panels
   'panels.eyebrow': 'WORKSPACE',
@@ -57,6 +62,21 @@ export const es = {
   'panelDetail.newTest': 'Nuevo test',
   'panelDetail.testsEmptyNoPersonas': 'Añade personas antes de correr un test.',
   'panelDetail.testsEmpty': 'Aún no hay tests en este panel.',
+  'panelDetail.delete': 'Eliminar panel',
+  'panelDetail.deleteTitle': 'Eliminar panel',
+  'panelDetail.deleteConfirm': 'Esto eliminara {{name}} con sus personas, tests y notas. Esta accion no se puede deshacer.',
+  'panelDetail.deleting': 'Eliminando...',
+
+  // Notes
+  'notes.tab': 'Notas',
+  'notes.eyebrow': 'WORKSPACE',
+  'notes.workspaceTitle': 'Notas y analisis',
+  'notes.testTitle': 'Notas / analisis personalizados',
+  'notes.new': 'Nueva nota',
+  'notes.empty': 'Aun no hay notas.',
+  'notes.defaultTitle': 'Analisis personalizado',
+  'notes.edit': 'Editar',
+  'notes.preview': 'Preview',
 
   // Interview
   'interview.button': 'Entrevistar',
