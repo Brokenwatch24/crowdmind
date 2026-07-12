@@ -105,3 +105,44 @@ export function listBundledTemplates(): BundledTemplate[] {
   }
   return results.sort((a, b) => a.template.nombre.localeCompare(b.template.nombre))
 }
+
+const REPO_OWNER = 'Brokenwatch24'
+const REPO_NAME = 'crowdmind'
+const TEMPLATES_PATH = 'resources/templates'
+
+interface GitHubContentEntry {
+  name: string
+  download_url: string | null
+}
+
+/**
+ * Fetches whatever templates are currently in `resources/templates/` on the repo's default branch —
+ * lets new community-contributed templates show up immediately after merge, without waiting for the
+ * next app release/auto-update. Best-effort: any network/parse failure just yields fewer templates,
+ * never throws (this is a "nice to have" refresh, not core functionality).
+ */
+export async function fetchRemoteTemplates(): Promise<BundledTemplate[]> {
+  try {
+    const listRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${TEMPLATES_PATH}`, {
+      headers: { Accept: 'application/vnd.github+json' }
+    })
+    if (!listRes.ok) return []
+    const entries = (await listRes.json()) as GitHubContentEntry[]
+
+    const results: BundledTemplate[] = []
+    for (const entry of entries) {
+      if (!entry.name.endsWith('.json') || !entry.download_url) continue
+      try {
+        const fileRes = await fetch(entry.download_url)
+        if (!fileRes.ok) continue
+        const content = await fileRes.text()
+        results.push({ fileName: entry.name, template: parseMarketplaceTemplate(content) })
+      } catch {
+        // skip this one file, keep going
+      }
+    }
+    return results.sort((a, b) => a.template.nombre.localeCompare(b.template.nombre))
+  } catch {
+    return []
+  }
+}

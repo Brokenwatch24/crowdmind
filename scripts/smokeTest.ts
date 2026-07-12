@@ -21,7 +21,7 @@ import { runFunnelTest } from '../src/main/engine/funnelEngine'
 import { createComparacion, computeComparison } from '../src/main/db/repo/comparison'
 import { generarReporteNarrativoHtml, generarReporteNarrativoMarkdown } from '../src/main/report/narrativeReport'
 import { parseCsvToPersonaDrafts } from '../src/main/csv/csvImport'
-import { buildMarketplaceTemplate, parseMarketplaceTemplate, listBundledTemplates } from '../src/main/marketplace/marketplace'
+import { buildMarketplaceTemplate, parseMarketplaceTemplate, listBundledTemplates, fetchRemoteTemplates } from '../src/main/marketplace/marketplace'
 import { seedDemoWorkspace } from '../src/main/demo/seedDemo'
 import { parseDataUri } from '../src/main/llm/types'
 import { listPanels } from '../src/main/db/repo/panels'
@@ -197,6 +197,13 @@ async function main() {
   console.log(
     `[ok] bundled templates load and validate — ${bundledTemplates.map((b) => `${b.template.nombre} (${b.template.personas.length})`).join(', ')}`
   )
+
+  try {
+    const remoteTemplates = await fetchRemoteTemplates()
+    console.log(`[ok] fetched ${remoteTemplates.length} template(s) live from GitHub (Brokenwatch24/crowdmind)`)
+  } catch (err) {
+    console.log(`[warn] live GitHub template fetch failed (non-fatal, network-dependent): ${err instanceof Error ? err.message : err}`)
+  }
 
   const demoWorkspace = await seedDemoWorkspace()
   const demoPanels = listPanels(demoWorkspace.id)

@@ -24,6 +24,7 @@ import type {
   ProviderSetting,
   TemaTest,
   TestResultSummary,
+  UpdateStatus,
   Workspace
 } from '@shared/types'
 
@@ -136,7 +137,20 @@ const api = {
       ipcRenderer.invoke(IPC.marketplaceExportPanel, input),
     importPanel: (): Promise<MarketplacePanelTemplate | null> => ipcRenderer.invoke(IPC.marketplaceImportPanel),
     listBundled: (): Promise<Array<{ fileName: string; template: MarketplacePanelTemplate }>> =>
-      ipcRenderer.invoke(IPC.marketplaceListBundled)
+      ipcRenderer.invoke(IPC.marketplaceListBundled),
+    refreshFromRepo: (): Promise<Array<{ fileName: string; template: MarketplacePanelTemplate }>> =>
+      ipcRenderer.invoke(IPC.marketplaceRefreshFromRepo)
+  },
+  update: {
+    isSupported: (): Promise<boolean> => ipcRenderer.invoke(IPC.updateIsSupported),
+    check: (): Promise<void> => ipcRenderer.invoke(IPC.updateCheck),
+    download: (): Promise<void> => ipcRenderer.invoke(IPC.updateDownload),
+    install: (): Promise<void> => ipcRenderer.invoke(IPC.updateInstall),
+    onStatus: (callback: (status: UpdateStatus) => void): (() => void) => {
+      const listener = (_e: unknown, status: UpdateStatus) => callback(status)
+      ipcRenderer.on(IPC.updateStatusPush, listener)
+      return () => ipcRenderer.removeListener(IPC.updateStatusPush, listener)
+    }
   },
   chat: {
     list: (personaId: string): Promise<ChatMensaje[]> => ipcRenderer.invoke(IPC.chatList, personaId),

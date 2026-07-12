@@ -12,6 +12,7 @@ import { registerComparisonHandlers } from './comparison'
 import { registerTimelineHandlers } from './timeline'
 import { registerExportHandlers } from './exportReport'
 import { registerMarketplaceHandlers } from './marketplace'
+import { registerUpdateHandlers } from './update'
 
 export function registerIpcHandlers(): void {
   registerWorkspaceHandlers()
@@ -28,4 +29,5 @@ export function registerIpcHandlers(): void {
   registerTimelineHandlers()
   registerExportHandlers()
   registerMarketplaceHandlers()
+  registerUpdateHandlers()
 }

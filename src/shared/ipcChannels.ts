@@ -55,6 +55,12 @@ export const IPC = {
   marketplaceListBundled: 'marketplace:listBundled',
   marketplaceRefreshFromRepo: 'marketplace:refreshFromRepo',
 
+  updateCheck: 'update:check',
+  updateDownload: 'update:download',
+  updateInstall: 'update:install',
+  updateIsSupported: 'update:isSupported',
+  updateStatusPush: 'update:statusPush',
+
   chatList: 'chat:list',
   chatSend: 'chat:send',
 

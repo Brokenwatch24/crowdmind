@@ -4,6 +4,7 @@ import { cn } from '@renderer/lib/utils'
 import { Logo } from './Logo'
 import { WorkspaceSwitcher } from './WorkspaceSwitcher'
 import { ProviderSwitcher } from './ProviderSwitcher'
+import { UpdateBanner } from '@renderer/components/UpdateBanner'
 import { useAppStore } from '@renderer/store/useAppStore'
 
 function NavItem({ to, icon: Icon, label }: { to: string; icon: typeof LayoutGrid; label: string }) {
@@ -48,6 +49,7 @@ export function AppShell() {
           </div>
           <ProviderSwitcher />
         </header>
+        <UpdateBanner />
         <main className="min-h-0 flex-1 overflow-y-auto">
           <Outlet />
         </main>

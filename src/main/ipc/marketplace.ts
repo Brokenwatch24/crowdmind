@@ -1,7 +1,7 @@
 import { ipcMain, BrowserWindow, dialog } from 'electron'
 import fs from 'node:fs'
 import { IPC } from '@shared/ipcChannels'
-import { buildMarketplaceTemplate, parseMarketplaceTemplate, listBundledTemplates } from '../marketplace/marketplace'
+import { buildMarketplaceTemplate, parseMarketplaceTemplate, listBundledTemplates, fetchRemoteTemplates } from '../marketplace/marketplace'
 import { updatePanel } from '../db/repo/panels'
 
 function safeFileName(name: string): string {
@@ -51,4 +51,5 @@ export function registerMarketplaceHandlers(): void {
   })
 
   ipcMain.handle(IPC.marketplaceListBundled, () => listBundledTemplates())
+  ipcMain.handle(IPC.marketplaceRefreshFromRepo, () => fetchRemoteTemplates())
 }

@@ -293,6 +293,15 @@ export interface MarketplacePanelTemplate {
   personas: PersonaDraft[]
 }
 
+export type UpdateStatus =
+  | { state: 'idle' }
+  | { state: 'checking' }
+  | { state: 'not-available' }
+  | { state: 'available'; version: string }
+  | { state: 'downloading'; percent: number }
+  | { state: 'downloaded'; version: string }
+  | { state: 'error'; message: string }
+
 export function sentimentBucket(score: number): 'positivo' | 'neutro' | 'negativo' {
   if (score >= 7) return 'positivo'
   if (score >= 4) return 'neutro'

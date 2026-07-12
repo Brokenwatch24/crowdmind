@@ -3,8 +3,9 @@ import path from 'node:path'
 import { is } from './electronEnv'
 import { getDb } from './db/client'
 import { registerIpcHandlers } from './ipc/register'
+import { initAutoUpdater, checkForUpdates, isAutoUpdateSupported } from './update/autoUpdate'
 
-function createWindow(): void {
+function createWindow(): BrowserWindow {
   const win = new BrowserWindow({
     width: 1440,
     height: 900,
@@ -32,6 +33,8 @@ function createWindow(): void {
   } else {
     win.loadFile(path.join(__dirname, '../renderer/index.html'))
   }
+
+  return win
 }
 
 app.whenReady().then(() => {
@@ -42,7 +45,13 @@ app.whenReady().then(() => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
 
-  createWindow()
+  const win = createWindow()
+  initAutoUpdater(win)
+  if (isAutoUpdateSupported()) {
+    win.once('ready-to-show', () => {
+      setTimeout(() => checkForUpdates(), 3000)
+    })
+  }
 })
 
 app.on('window-all-closed', () => {
