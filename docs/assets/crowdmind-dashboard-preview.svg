@@ -1,0 +1,45 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1280" height="720" rx="28" fill="#0E1117"/>
+  <rect x="28" y="28" width="1224" height="664" rx="22" fill="#111827" stroke="#253041"/>
+  <rect x="52" y="52" width="210" height="616" rx="16" fill="#0B1018"/>
+  <circle cx="82" cy="84" r="16" fill="#6EE7B7"/>
+  <text x="108" y="91" fill="#F8FAFC" font-family="Inter,Segoe UI,Arial" font-size="19" font-weight="700">Crowdmind</text>
+  <text x="76" y="146" fill="#94A3B8" font-family="Inter,Segoe UI,Arial" font-size="12" font-weight="700">WORKSPACE</text>
+  <rect x="72" y="162" width="152" height="34" rx="8" fill="#172033"/>
+  <text x="88" y="184" fill="#E2E8F0" font-family="Inter,Segoe UI,Arial" font-size="13">Platia Research</text>
+  <text x="76" y="248" fill="#CBD5E1" font-family="Inter,Segoe UI,Arial" font-size="14">Paneles</text>
+  <text x="76" y="290" fill="#64748B" font-family="Inter,Segoe UI,Arial" font-size="14">Comparar</text>
+  <text x="76" y="332" fill="#64748B" font-family="Inter,Segoe UI,Arial" font-size="14">Notas</text>
+  <text x="76" y="374" fill="#64748B" font-family="Inter,Segoe UI,Arial" font-size="14">Ajustes</text>
+  <text x="304" y="82" fill="#94A3B8" font-family="Inter,Segoe UI,Arial" font-size="12" font-weight="700">WORKSPACE</text>
+  <text x="304" y="118" fill="#F8FAFC" font-family="Inter,Segoe UI,Arial" font-size="32" font-weight="800">Paneles de investigación</text>
+  <rect x="304" y="158" width="270" height="154" rx="14" fill="#151E2E" stroke="#263246"/>
+  <text x="328" y="192" fill="#F8FAFC" font-family="Inter,Segoe UI,Arial" font-size="18" font-weight="700">Restaurantes Colombia</text>
+  <text x="328" y="222" fill="#94A3B8" font-family="Inter,Segoe UI,Arial" font-size="13">Dueños y gerentes de restaurantes</text>
+  <text x="328" y="254" fill="#6EE7B7" font-family="Inter,Segoe UI,Arial" font-size="28" font-weight="800">19</text>
+  <text x="372" y="253" fill="#94A3B8" font-family="Inter,Segoe UI,Arial" font-size="13">personas sintéticas</text>
+  <rect x="608" y="158" width="270" height="154" rx="14" fill="#151E2E" stroke="#263246"/>
+  <text x="632" y="192" fill="#F8FAFC" font-family="Inter,Segoe UI,Arial" font-size="18" font-weight="700">Fundadores SaaS</text>
+  <text x="632" y="222" fill="#94A3B8" font-family="Inter,Segoe UI,Arial" font-size="13">Pricing, onboarding y GTM B2B</text>
+  <text x="632" y="254" fill="#FBBF24" font-family="Inter,Segoe UI,Arial" font-size="28" font-weight="800">6</text>
+  <text x="664" y="253" fill="#94A3B8" font-family="Inter,Segoe UI,Arial" font-size="13">personas curadas</text>
+  <rect x="912" y="158" width="270" height="154" rx="14" fill="#151E2E" stroke="#263246"/>
+  <text x="936" y="192" fill="#F8FAFC" font-family="Inter,Segoe UI,Arial" font-size="18" font-weight="700">Consumidores LatAm</text>
+  <text x="936" y="222" fill="#94A3B8" font-family="Inter,Segoe UI,Arial" font-size="13">CPG, retail y apps de consumo</text>
+  <text x="936" y="254" fill="#60A5FA" font-family="Inter,Segoe UI,Arial" font-size="28" font-weight="800">6</text>
+  <text x="968" y="253" fill="#94A3B8" font-family="Inter,Segoe UI,Arial" font-size="13">segmentos</text>
+  <rect x="304" y="356" width="878" height="276" rx="16" fill="#151E2E" stroke="#263246"/>
+  <text x="328" y="392" fill="#F8FAFC" font-family="Inter,Segoe UI,Arial" font-size="20" font-weight="800">Últimos tests</text>
+  <rect x="328" y="426" width="810" height="48" rx="10" fill="#0F172A"/>
+  <text x="352" y="456" fill="#E2E8F0" font-family="Inter,Segoe UI,Arial" font-size="14">Propuesta y precio</text>
+  <text x="760" y="456" fill="#6EE7B7" font-family="Inter,Segoe UI,Arial" font-size="14" font-weight="700">6.1 / 10</text>
+  <text x="940" y="456" fill="#94A3B8" font-family="Inter,Segoe UI,Arial" font-size="13">19 respuestas</text>
+  <rect x="328" y="492" width="810" height="48" rx="10" fill="#0F172A"/>
+  <text x="352" y="522" fill="#E2E8F0" font-family="Inter,Segoe UI,Arial" font-size="14">Landing page AIDA</text>
+  <text x="760" y="522" fill="#FBBF24" font-family="Inter,Segoe UI,Arial" font-size="14" font-weight="700">5.4 / 10</text>
+  <text x="940" y="522" fill="#94A3B8" font-family="Inter,Segoe UI,Arial" font-size="13">funnel</text>
+  <rect x="328" y="558" width="810" height="48" rx="10" fill="#0F172A"/>
+  <text x="352" y="588" fill="#E2E8F0" font-family="Inter,Segoe UI,Arial" font-size="14">Mensaje de lanzamiento</text>
+  <text x="760" y="588" fill="#EF4444" font-family="Inter,Segoe UI,Arial" font-size="14" font-weight="700">3.8 / 10</text>
+  <text x="940" y="588" fill="#94A3B8" font-family="Inter,Segoe UI,Arial" font-size="13">objeciones altas</text>
+</svg>

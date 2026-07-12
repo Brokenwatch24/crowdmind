@@ -1,5 +1,6 @@
 appId: com.crowdmind.app
 productName: Crowdmind
+artifactName: ${productName}-Setup-${version}.${ext}
 copyright: Copyright © 2026 Crowdmind contributors
 
 directories:
