@@ -12,10 +12,11 @@ new community-contributed persona templates.
 Repo: **https://github.com/Brokenwatch24/crowdmind**
 
 > **Status:** the full feature set below is implemented and verified end-to-end
-> (`npm run smoke-test`, 19 checks covering every feature). A Windows installer builds and launches
-> correctly; macOS/Linux packaging is configured but unverified (this dev machine can't produce those
-> builds). No GitHub Release has been cut yet, so auto-update has nothing to check against until one is
-> published — see [Cutting a release](#cutting-a-release).
+> (`npm run smoke-test`, 19 checks covering every feature). **[v0.1.0](https://github.com/Brokenwatch24/crowdmind/releases/tag/v0.1.0)**
+> is published with a Windows installer — download it directly, no build required. macOS/Linux
+> packaging is configured but unverified (this dev machine can't produce those builds) — see
+> [Cutting a release](#cutting-a-release) if you want to build and publish them from a Mac/Linux
+> machine.
 
 ## Features
 
@@ -61,6 +62,10 @@ Repo: **https://github.com/Brokenwatch24/crowdmind**
   pull the latest ones straight from GitHub without waiting for an app update.
 
 ## Getting started
+
+**Just want to use the app on Windows?** Download the installer from the
+[latest release](https://github.com/Brokenwatch24/crowdmind/releases/latest) and skip straight to running
+it — no Node/build tooling needed. The rest of this section is for running from source or contributing.
 
 Requirements: **Node.js 20+**, **npm**. On Windows, native module compilation for `better-sqlite3` needs
 Python and MSVC Build Tools (Visual Studio Build Tools with the "Desktop development with C++" workload)
