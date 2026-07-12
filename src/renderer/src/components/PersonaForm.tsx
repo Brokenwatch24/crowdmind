@@ -1,6 +1,9 @@
 import { useState } from 'react'
+import { Sparkles } from 'lucide-react'
 import type { PersonaDraft } from '@shared/types'
 import { DISPOSICIONES, NIVELES_INGRESO } from '@shared/types'
+import { api } from '@renderer/lib/api'
+import { useAppStore } from '@renderer/store/useAppStore'
 import { Input } from '@renderer/components/ui/input'
 import { Textarea } from '@renderer/components/ui/textarea'
 import { Label } from '@renderer/components/ui/label'
@@ -32,14 +35,22 @@ const EMPTY: PersonaDraft = {
 export function PersonaForm({
   initial,
   onSubmit,
-  submitLabel
+  submitLabel,
+  workspaceId,
+  enableAiImprove = false
 }: {
   initial?: Partial<PersonaDraft>
   onSubmit: (draft: PersonaDraft) => void | Promise<void>
   submitLabel?: string
+  workspaceId?: string
+  enableAiImprove?: boolean
 }) {
   const [draft, setDraft] = useState<PersonaDraft>({ ...EMPTY, ...initial })
   const [saving, setSaving] = useState(false)
+  const [improving, setImproving] = useState(false)
+  const [improveInstructions, setImproveInstructions] = useState('')
+  const provider = useAppStore((s) => s.currentProvider)
+  const model = useAppStore((s) => s.currentModel)
   const t = useT()
   const resolvedSubmitLabel = submitLabel ?? t('personaForm.save')
 
@@ -54,6 +65,23 @@ export function PersonaForm({
       await onSubmit(draft)
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function handleImprove() {
+    if (!workspaceId) return
+    setImproving(true)
+    try {
+      const improved = await api.personas.improveDraft({
+        workspaceId,
+        draft,
+        instructions: improveInstructions,
+        provider,
+        model: model ?? undefined
+      })
+      setDraft({ ...draft, ...improved })
+    } finally {
+      setImproving(false)
     }
   }
 
@@ -171,6 +199,23 @@ export function PersonaForm({
           onChange={(e) => set('historiaPersonal', e.target.value)}
         />
       </div>
+
+      {enableAiImprove && workspaceId && (
+        <div className="rounded-lg border border-border bg-surface p-3">
+          <Label htmlFor="p-improve">{t('personaForm.aiImproveLabel')}</Label>
+          <Textarea
+            id="p-improve"
+            className="mt-1.5"
+            rows={2}
+            value={improveInstructions}
+            onChange={(e) => setImproveInstructions(e.target.value)}
+            placeholder={t('personaForm.aiImprovePlaceholder')}
+          />
+          <Button variant="secondary" className="mt-2 w-full" onClick={handleImprove} disabled={improving}>
+            <Sparkles size={14} /> {improving ? t('personaForm.aiImproving') : t('personaForm.aiImprove')}
+          </Button>
+        </div>
+      )}
 
       <Button className="w-full" onClick={handleSubmit} disabled={saving || !draft.nombre.trim()}>
         {saving ? t('personaForm.saving') : resolvedSubmitLabel}

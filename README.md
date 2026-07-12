@@ -101,12 +101,18 @@ direct HTTPS request to the provider you chose.
 npm run build       # production build (main + preload + renderer) via electron-vite
 npm run typecheck   # strict TypeScript check across main/preload/renderer
 npm run smoke-test  # end-to-end check of every feature using the Local provider (no API keys needed)
+npm run mcp -- --db "C:\path\to\crowdmind.sqlite"  # start the CrowdMind MCP server over stdio
 npm run db:generate # generate a Drizzle migration after changing src/main/db/schema.ts
 npm run dist:win    # build + package a Windows installer into release/
 npm run dist:mac    # build + package a macOS dmg (must run on macOS)
 npm run dist:linux  # build + package a Linux AppImage
 npm run release     # build + package + publish to GitHub Releases (needs a GH token, see below)
 ```
+
+The MCP server exposes local tools for agentic clients such as Codex or other MCP-compatible runners:
+list workspaces/panels/personas, generate local persona previews, save personas, run a simple local test,
+and fetch compact test results. It opens the SQLite database you pass through `--db` or
+`CROWDMIND_DB_PATH`.
 
 ## Packaging & distribution
 

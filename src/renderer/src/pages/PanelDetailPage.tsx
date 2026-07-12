@@ -13,6 +13,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@renderer/components/u
 import { PersonaForm } from '@renderer/components/PersonaForm'
 import { GenerateWithAiDialog } from '@renderer/components/GenerateWithAiDialog'
 import { CsvImportDialog } from '@renderer/components/CsvImportDialog'
+import { InterviewDialog } from '@renderer/components/InterviewDialog'
 import { ExportPanelDialog } from '@renderer/components/ExportPanelDialog'
 import { formatDate } from '@renderer/lib/utils'
 import { useT } from '@renderer/i18n/useT'
@@ -72,6 +73,7 @@ export function PanelDetailPage() {
         <TabsContent value="personas">
           <div className="mb-4 flex justify-end gap-2">
             <GenerateWithAiDialog workspaceId={workspaceId} panelId={panelId} onSaved={refreshAll} />
+            <InterviewDialog workspaceId={workspaceId} panelId={panelId} />
             <CsvImportDialog panelId={panelId} onSaved={refreshAll} />
             <Dialog open={newPersonaOpen} onOpenChange={setNewPersonaOpen}>
               <DialogTrigger asChild>
@@ -82,6 +84,8 @@ export function PanelDetailPage() {
               <DialogContent className="max-w-xl">
                 <DialogTitle>{t('panelDetail.newPersonaTitle')}</DialogTitle>
                 <PersonaForm
+                  workspaceId={workspaceId}
+                  enableAiImprove
                   onSubmit={async (draft) => {
                     await api.personas.create(panelId, draft)
                     setNewPersonaOpen(false)

@@ -76,6 +76,36 @@ export function TestResultsPage() {
         </Card>
       </div>
 
+      {(Object.keys(summary.scorecardPromedios).length > 0 || summary.benchmark.previousTests > 0) && (
+        <div className="mt-4 grid max-w-4xl grid-cols-1 gap-3 lg:grid-cols-2">
+          {Object.keys(summary.scorecardPromedios).length > 0 && (
+            <Card className="p-4">
+              <div className="font-mono-label text-[10.5px] text-text-dim">{t('testResults.scorecard')}</div>
+              <div className="mt-3 space-y-2">
+                {Object.entries(summary.scorecardPromedios).map(([criterio, score]) => (
+                  <div key={criterio} className="flex items-center justify-between gap-3 text-sm">
+                    <span className="truncate text-text-muted">{criterio}</span>
+                    <span className="font-mono-label text-xs font-semibold text-text">{score.toFixed(1)}/10</span>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
+          {summary.benchmark.previousTests > 0 && (
+            <Card className="p-4">
+              <div className="font-mono-label text-[10.5px] text-text-dim">{t('testResults.benchmark')}</div>
+              <div className="mt-2 text-sm text-text-muted">
+                {t('testResults.benchmarkText', {
+                  count: summary.benchmark.previousTests,
+                  previous: summary.benchmark.previousAverage?.toFixed(1) ?? '-',
+                  delta: summary.benchmark.delta === null ? '-' : `${summary.benchmark.delta >= 0 ? '+' : ''}${summary.benchmark.delta.toFixed(1)}`
+                })}
+              </div>
+            </Card>
+          )}
+        </div>
+      )}
+
       {summary.test.resumenEjecutivo && (
         <Card className="mt-4 max-w-4xl p-4">
           <div className="flex gap-3">
@@ -98,6 +128,15 @@ export function TestResultsPage() {
                     <div className="font-mono-label text-xs font-semibold text-text">{r.scoreSatisfaccion}/10</div>
                   </div>
                   <div className="mt-1 text-sm text-text-muted">{r.opinionTexto}</div>
+                  {Object.keys(r.scorecardScores).length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {Object.entries(r.scorecardScores).map(([criterio, score]) => (
+                        <Badge key={criterio} variant="neutral">
+                          {criterio}: {score}/10
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                   {r.aspectosPositivos.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {r.aspectosPositivos.map((a, i) => (

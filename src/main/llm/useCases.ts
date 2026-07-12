@@ -1,4 +1,4 @@
-import type { ChatMensaje, EtapaFunnel, Persona, PersonaDraft, ProviderId, RespuestaConPersona } from '@shared/types'
+import type { ChatMensaje, EtapaFunnel, Persona, PersonaDraft, PersonaGenerationInput, ProviderId, RespuestaConPersona } from '@shared/types'
 import { providerRegistry } from './providerRegistry'
 import { generatePersonasLocal } from './local/personaGenerator'
 import { respondToStimulusLocal, type LocalRespuesta } from './local/testResponder'
@@ -10,6 +10,7 @@ import { followUpReplyLocal } from './local/followUpReplier'
 import { funnelStageResponseLocal, type LocalFunnelRespuesta } from './local/funnelResponder'
 import {
   personaGenSchema,
+  personaImproveSchema,
   testResponseSchema,
   chatReplySchema,
   confidenceDisclaimersSchema,
@@ -17,6 +18,7 @@ import {
   temasExtraccionSchema,
   funnelStageResponseSchema,
   PERSONA_GEN_SHAPE_HINT,
+  PERSONA_IMPROVE_SHAPE_HINT,
   TEST_RESPONSE_SHAPE_HINT,
   CHAT_REPLY_SHAPE_HINT,
   CONFIDENCE_DISCLAIMERS_SHAPE_HINT,
@@ -27,8 +29,11 @@ import {
 import {
   personaGenSystemPrompt,
   personaGenUserPrompt,
+  personaGenStructuredUserPrompt,
+  personaImproveSystemPrompt,
+  personaImproveUserPrompt,
   personaSystemPrompt,
-  testStimulusUserPrompt,
+  testStimulusUserPromptWithScorecard,
   chatUserPrompt,
   followUpUserPrompt,
   confidenceDisclaimersSystemPrompt,
@@ -37,7 +42,7 @@ import {
   resumenEjecutivoUserPrompt,
   temasSystemPrompt,
   temasUserPrompt,
-  funnelStageUserPrompt,
+  funnelStageUserPromptWithScorecard,
   type EtapaPropiaHistorial
 } from './promptTemplates'
 
@@ -47,39 +52,111 @@ export interface ProviderCall {
   model: string
 }
 
-export async function generatePersonasWithAi(call: ProviderCall, brief: string, count: number): Promise<PersonaDraft[]> {
+function generationInputToBrief(input: PersonaGenerationInput): string {
+  return [
+    input.audience,
+    input.market,
+    input.productContext,
+    input.researchGoal,
+    input.mustInclude,
+    input.mustAvoid,
+    input.diversityAxes,
+    input.tone,
+    input.notes,
+    input.batchNonce
+  ]
+    .filter(Boolean)
+    .join(' | ')
+}
+
+function normalizeGeneratedPersona(p: Omit<PersonaDraft, 'llmProviderOverride' | 'llmModelOverride'>): PersonaDraft {
+  return { ...p, llmProviderOverride: null, llmModelOverride: null }
+}
+
+export async function generatePersonasWithAi(
+  call: ProviderCall,
+  inputOrBrief: PersonaGenerationInput | string,
+  count?: number,
+  existingPersonas: Persona[] = []
+): Promise<PersonaDraft[]> {
   if (call.provider === 'local') {
-    return generatePersonasLocal(brief, count)
+    if (typeof inputOrBrief === 'string') return generatePersonasLocal(inputOrBrief, count ?? 1)
+    return generatePersonasLocal(generationInputToBrief(inputOrBrief), inputOrBrief.count)
   }
+  const structured = typeof inputOrBrief !== 'string'
   const result = await providerRegistry[call.provider].chatJson({
     apiKey: call.apiKey,
     model: call.model,
     system: personaGenSystemPrompt(),
-    user: personaGenUserPrompt(brief, count),
+    user: structured
+      ? personaGenStructuredUserPrompt(inputOrBrief, existingPersonas)
+      : personaGenUserPrompt(inputOrBrief, count ?? 1),
     schema: personaGenSchema,
     shapeHint: PERSONA_GEN_SHAPE_HINT
   })
-  return result.personas.map((p) => ({ ...p, llmProviderOverride: null, llmModelOverride: null }))
+  return result.personas.map(normalizeGeneratedPersona)
+}
+
+export async function improvePersonaDraftWithAi(
+  call: ProviderCall,
+  draft: PersonaDraft,
+  instructions: string
+): Promise<PersonaDraft> {
+  if (call.provider === 'local') {
+    const fallback = generatePersonasLocal(`${draft.nombre}-${draft.ocupacion}-${instructions}`, 1)[0]
+    return {
+      ...fallback,
+      ...draft,
+      nombre: draft.nombre.trim() || fallback.nombre,
+      edad: draft.edad || fallback.edad,
+      genero: draft.genero.trim() || fallback.genero,
+      ciudad: draft.ciudad.trim() || fallback.ciudad,
+      pais: draft.pais.trim() || fallback.pais,
+      ocupacion: draft.ocupacion.trim() || fallback.ocupacion,
+      nivelEducativo: draft.nivelEducativo.trim() || fallback.nivelEducativo,
+      estadoCivil: draft.estadoCivil.trim() || fallback.estadoCivil,
+      rasgos: draft.rasgos.length ? draft.rasgos : fallback.rasgos,
+      valores: draft.valores.length ? draft.valores : fallback.valores,
+      historiaPersonal:
+        draft.historiaPersonal.trim() ||
+        `${fallback.historiaPersonal} Sus decisiones de compra suelen depender de recomendaciones cercanas, precio percibido y confianza en la marca.`,
+      objecionesTipicas: draft.objecionesTipicas.length ? draft.objecionesTipicas : fallback.objecionesTipicas,
+      canalPreferido: draft.canalPreferido.trim() || fallback.canalPreferido,
+      llmProviderOverride: draft.llmProviderOverride ?? null,
+      llmModelOverride: draft.llmModelOverride ?? null
+    }
+  }
+  const result = await providerRegistry[call.provider].chatJson({
+    apiKey: call.apiKey,
+    model: call.model,
+    system: personaImproveSystemPrompt(),
+    user: personaImproveUserPrompt(draft, instructions),
+    schema: personaImproveSchema,
+    shapeHint: PERSONA_IMPROVE_SHAPE_HINT
+  })
+  return normalizeGeneratedPersona(result.persona)
 }
 
 export async function getPersonaResponseToStimulus(
   call: ProviderCall,
   persona: Persona,
   estimulo: string,
-  imageDataUri?: string
+  imageDataUri?: string,
+  scorecardCriteria: string[] = []
 ): Promise<LocalRespuesta> {
   if (call.provider === 'local') {
-    return respondToStimulusLocal(persona, estimulo, Boolean(imageDataUri))
+    return respondToStimulusLocal(persona, estimulo, Boolean(imageDataUri), scorecardCriteria)
   }
-  return providerRegistry[call.provider].chatJson({
+  const result = await providerRegistry[call.provider].chatJson({
     apiKey: call.apiKey,
     model: call.model,
     system: personaSystemPrompt(persona),
-    user: testStimulusUserPrompt(estimulo, Boolean(imageDataUri)),
+    user: testStimulusUserPromptWithScorecard(estimulo, Boolean(imageDataUri), scorecardCriteria),
     schema: testResponseSchema,
     shapeHint: TEST_RESPONSE_SHAPE_HINT,
     imageDataUri
   })
+  return { ...result, scorecardScores: result.scorecardScores ?? {} }
 }
 
 export async function getPersonaChatReply(
@@ -127,20 +204,22 @@ export async function getFunnelStageResponse(
   persona: Persona,
   etapa: EtapaFunnel,
   historialPropio: EtapaPropiaHistorial[],
-  peerSummary?: string
+  peerSummary?: string,
+  scorecardCriteria: string[] = []
 ): Promise<LocalFunnelRespuesta> {
   if (call.provider === 'local') {
-    return funnelStageResponseLocal(persona, etapa, historialPropio, peerSummary)
+    return funnelStageResponseLocal(persona, etapa, historialPropio, peerSummary, scorecardCriteria)
   }
-  return providerRegistry[call.provider].chatJson({
+  const result = await providerRegistry[call.provider].chatJson({
     apiKey: call.apiKey,
     model: call.model,
     system: personaSystemPrompt(persona),
-    user: funnelStageUserPrompt(etapa, historialPropio, peerSummary),
+    user: funnelStageUserPromptWithScorecard(etapa, historialPropio, peerSummary, scorecardCriteria),
     schema: funnelStageResponseSchema,
     shapeHint: FUNNEL_STAGE_RESPONSE_SHAPE_HINT,
     imageDataUri: etapa.estimuloMetadata.imagenDataUri
   })
+  return { ...result, scorecardScores: result.scorecardScores ?? {} }
 }
 
 export async function getConfidenceDisclaimersQualitative(call: ProviderCall, respuestas: RespuestaConPersona[]): Promise<string[]> {

@@ -72,6 +72,7 @@ CREATE TABLE IF NOT EXISTS tests (
   estimulo_tipo TEXT NOT NULL DEFAULT 'texto',
   estimulo_contenido TEXT NOT NULL,
   estimulo_metadata_json TEXT NOT NULL DEFAULT '{}',
+  scorecard_criteria_json TEXT NOT NULL DEFAULT '[]',
   resumen_ejecutivo TEXT,
   disclaimers_json TEXT NOT NULL DEFAULT '[]',
   indice_confianza INTEGER,
@@ -147,6 +148,7 @@ CREATE TABLE IF NOT EXISTS respuestas (
   avanzo_a_siguiente_etapa INTEGER,
   persona_version_id TEXT,
   score_satisfaccion INTEGER NOT NULL,
+  scorecard_scores_json TEXT NOT NULL DEFAULT '{}',
   opinion_texto TEXT NOT NULL,
   objeciones_json TEXT NOT NULL DEFAULT '[]',
   aspectos_positivos_json TEXT NOT NULL DEFAULT '[]',
@@ -196,7 +198,9 @@ function runAdditiveMigrations(sqlite: Database.Database): void {
   ensureColumn(sqlite, 'tests', 'disclaimers_json', "TEXT NOT NULL DEFAULT '[]'")
   ensureColumn(sqlite, 'tests', 'indice_confianza', 'INTEGER')
   ensureColumn(sqlite, 'tests', 'confianza_breakdown_json', 'TEXT')
+  ensureColumn(sqlite, 'tests', 'scorecard_criteria_json', "TEXT NOT NULL DEFAULT '[]'")
   ensureColumn(sqlite, 'personas', 'avatar_image_data_uri', 'TEXT')
+  ensureColumn(sqlite, 'respuestas', 'scorecard_scores_json', "TEXT NOT NULL DEFAULT '{}'")
 }
 
 export function getDb() {

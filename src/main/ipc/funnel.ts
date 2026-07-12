@@ -25,6 +25,7 @@ export function registerFunnelHandlers(): void {
         provider: ProviderId
         model?: string
         personaIds?: string[]
+        scorecardCriteria?: string[]
       }
     ) => {
       const test = testsRepo.createTest({
@@ -34,7 +35,8 @@ export function registerFunnelHandlers(): void {
         tipo: 'funnel',
         modoInteraccion: input.modoInteraccion,
         estimuloTipo: 'texto',
-        estimuloContenido: input.etapas[0]?.estimuloContenido ?? ''
+        estimuloContenido: input.etapas[0]?.estimuloContenido ?? '',
+        scorecardCriteria: input.scorecardCriteria ?? []
       })
 
       const etapas = funnelRepo.createEtapas(test.id, input.etapas)
@@ -48,6 +50,7 @@ export function registerFunnelHandlers(): void {
         personas,
         etapas,
         modoInteraccion: input.modoInteraccion,
+        scorecardCriteria: input.scorecardCriteria ?? [],
         resolveCallForPersona: (persona) => resolveCallForPersona(persona, input.workspaceId, input.provider, input.model)
       })
 

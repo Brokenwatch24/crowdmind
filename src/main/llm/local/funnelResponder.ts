@@ -21,6 +21,7 @@ const ASPECTOS_POSITIVOS_POOL = [
 
 export interface LocalFunnelRespuesta {
   scoreSatisfaccion: number
+  scorecardScores: Record<string, number>
   opinionTexto: string
   objeciones: string[]
   aspectosPositivos: string[]
@@ -31,7 +32,8 @@ export function funnelStageResponseLocal(
   persona: Persona,
   etapa: EtapaFunnel,
   historialPropio: EtapaPropiaHistorial[],
-  peerSummary?: string
+  peerSummary?: string,
+  scorecardCriteria: string[] = []
 ): LocalFunnelRespuesta {
   const seed = hashSeed(`${persona.id}::${etapa.id}::${historialPropio.length}::${peerSummary ?? ''}`)
   const rng = mulberry32(seed)
@@ -51,6 +53,12 @@ export function funnelStageResponseLocal(
   } ${aspectosPositivos[0] ?? 'la propuesta'}${objeciones.length ? `, aunque ${objeciones[0]}` : ''}.`
 
   const avanzoASiguienteEtapa = scoreSatisfaccion >= 5
+  const scorecardScores = Object.fromEntries(
+    scorecardCriteria.map((criterio, idx) => {
+      const delta = randomInt(mulberry32(hashSeed(`${persona.id}::${etapa.id}::${criterio}::${idx}`)), -1, 1)
+      return [criterio, Math.min(10, Math.max(1, scoreSatisfaccion + delta))]
+    })
+  )
 
-  return { scoreSatisfaccion, opinionTexto, objeciones, aspectosPositivos, avanzoASiguienteEtapa }
+  return { scoreSatisfaccion, scorecardScores, opinionTexto, objeciones, aspectosPositivos, avanzoASiguienteEtapa }
 }

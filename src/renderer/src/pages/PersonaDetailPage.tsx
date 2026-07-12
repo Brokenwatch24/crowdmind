@@ -94,6 +94,8 @@ export function PersonaDetailPage() {
             <PersonaForm
               initial={persona}
               submitLabel={t('personaDetail.saveChanges')}
+              workspaceId={workspaceId}
+              enableAiImprove
               onSubmit={async (draft) => {
                 await api.personas.update(persona.id, draft)
                 refresh()

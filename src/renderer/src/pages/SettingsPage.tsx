@@ -16,9 +16,19 @@ import { cn } from '@renderer/lib/utils'
 
 function ProviderRow({ setting, onChanged }: { setting: ProviderSetting; onChanged: () => void }) {
   const [apiKey, setApiKey] = useState('')
+  const [customModel, setCustomModel] = useState(setting.defaultModel)
   const [saving, setSaving] = useState(false)
+  const [testing, setTesting] = useState(false)
+  const [status, setStatus] = useState<{ ok: boolean; message: string } | null>(null)
   const isLocal = setting.provider === 'local'
   const t = useT()
+  const modelOptions = PROVIDER_DEFAULT_MODELS[setting.provider].includes(setting.defaultModel)
+    ? PROVIDER_DEFAULT_MODELS[setting.provider]
+    : [setting.defaultModel, ...PROVIDER_DEFAULT_MODELS[setting.provider]]
+
+  useEffect(() => {
+    setCustomModel(setting.defaultModel)
+  }, [setting.defaultModel])
 
   async function handleSaveKey() {
     if (!apiKey.trim()) return
@@ -35,6 +45,25 @@ function ProviderRow({ setting, onChanged }: { setting: ProviderSetting; onChang
   async function handleClearKey() {
     await api.settings.clearApiKey({ provider: setting.provider, workspaceId: null })
     onChanged()
+  }
+
+  async function handleSaveModel() {
+    const model = customModel.trim()
+    if (!model) return
+    await api.settings.setDefaultModel({ provider: setting.provider, workspaceId: null, model })
+    onChanged()
+  }
+
+  async function handleTestProvider() {
+    setTesting(true)
+    setStatus(null)
+    try {
+      setStatus(await api.settings.testProvider({ provider: setting.provider, workspaceId: null }))
+    } catch (err) {
+      setStatus({ ok: false, message: err instanceof Error ? err.message : String(err) })
+    } finally {
+      setTesting(false)
+    }
   }
 
   return (
@@ -64,7 +93,7 @@ function ProviderRow({ setting, onChanged }: { setting: ProviderSetting; onChang
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {PROVIDER_DEFAULT_MODELS[setting.provider].map((m) => (
+              {modelOptions.map((m) => (
                 <SelectItem key={m} value={m}>
                   {m}
                 </SelectItem>
@@ -72,6 +101,13 @@ function ProviderRow({ setting, onChanged }: { setting: ProviderSetting; onChang
             </SelectContent>
           </Select>
         </div>
+      </div>
+
+      <div className="mt-3 grid grid-cols-[1fr_auto] gap-2">
+        <Input value={customModel} onChange={(e) => setCustomModel(e.target.value)} placeholder={t('settings.customModelPlaceholder')} />
+        <Button size="sm" variant="secondary" onClick={handleSaveModel} disabled={!customModel.trim()}>
+          {t('settings.useModel')}
+        </Button>
       </div>
 
       {!isLocal && (
@@ -91,7 +127,18 @@ function ProviderRow({ setting, onChanged }: { setting: ProviderSetting; onChang
               {t('settings.delete')}
             </Button>
           )}
+          <Button size="sm" variant="secondary" onClick={handleTestProvider} disabled={testing || !setting.hasApiKey}>
+            {testing ? t('settings.testing') : t('settings.test')}
+          </Button>
         </div>
+      )}
+      {status && (
+        <div className={cn('mt-2 text-xs', status.ok ? 'text-success' : 'text-danger')}>
+          {status.message}
+        </div>
+      )}
+      {setting.provider === 'openai' && (
+        <div className="mt-2 text-xs text-text-muted">{t('settings.codexHint')}</div>
       )}
     </Card>
   )

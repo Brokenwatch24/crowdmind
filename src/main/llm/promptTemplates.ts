@@ -137,3 +137,86 @@ export function chatUserPrompt(historia: ChatMensaje[], mensajeNuevo: string): s
     'Responde en primera persona, manteniendo tu personaje.'
   ].join('\n')
 }
+
+export function personaGenStructuredUserPrompt(input: import('@shared/types').PersonaGenerationInput, existingPersonas: Persona[]): string {
+  const existing = existingPersonas
+    .slice(0, 60)
+    .map((p) => `- ${p.nombre}, ${p.edad}, ${p.ciudad}, ${p.ocupacion}, ${p.nivelIngreso}, ${p.disposicionBase}: ${p.historiaPersonal.slice(0, 180)}`)
+    .join('\n')
+
+  return [
+    `Genera exactamente ${input.count} personas nuevas para este panel.`,
+    '',
+    'Brief estructurado:',
+    `- Audiencia objetivo: ${input.audience || 'sin especificar'}`,
+    `- Mercado / pais / ciudad: ${input.market || 'sin especificar'}`,
+    `- Producto, marca o contexto: ${input.productContext || 'sin especificar'}`,
+    `- Objetivo de investigacion: ${input.researchGoal || 'sin especificar'}`,
+    `- Debe incluir: ${input.mustInclude || 'sin requisitos adicionales'}`,
+    `- Debe evitar: ${input.mustAvoid || 'sin exclusiones adicionales'}`,
+    `- Ejes de diversidad: ${input.diversityAxes || 'edad, genero, ciudad, ingreso, ocupacion, actitudes, estilos de vida'}`,
+    `- Tono / profundidad: ${input.tone || 'profesional, especifico y accionable'}`,
+    `- Notas: ${input.notes || 'sin notas'}`,
+    `- ID de lote para variedad: ${input.batchNonce}`,
+    '',
+    existing
+      ? `Personas que ya existen en este panel. NO repitas sus nombres, combinaciones ni historias:\n${existing}`
+      : 'Este panel aun no tiene personas; crea un grupo inicial amplio y diverso.',
+    '',
+    'Requisitos:',
+    '- Cada persona debe tener una historia personal de 2-4 frases con detalles concretos.',
+    '- Incluye gustos, habitos, motivaciones y objeciones coherentes con su contexto.',
+    '- Varia disposicion base y nivel de ingreso cuando el brief lo permita.',
+    '- Devuelve exactamente la cantidad solicitada.'
+  ].join('\n')
+}
+
+export function personaImproveSystemPrompt(): string {
+  return [
+    'Eres un editor de personas sinteticas para investigacion de mercado.',
+    'Tu tarea es completar y mejorar un perfil sin cambiar innecesariamente la intencion del usuario.',
+    'Conserva los datos explicitos del usuario cuando sean coherentes y mejora los campos incompletos o genericos.'
+  ].join(' ')
+}
+
+export function personaImproveUserPrompt(draft: import('@shared/types').PersonaDraft, instructions: string): string {
+  return [
+    'Mejora esta persona para que sea util en un panel de investigacion.',
+    `Instrucciones del usuario: ${instructions || 'Completa campos vacios y haz el perfil mas realista, especifico y accionable.'}`,
+    '',
+    'Persona actual:',
+    JSON.stringify(draft, null, 2),
+    '',
+    'Reglas:',
+    '- Manten nombre, edad, genero, ciudad, pais y ocupacion si el usuario ya los escribio y son plausibles.',
+    '- Completa campos vacios con datos coherentes.',
+    '- Mejora historiaPersonal con 2-4 frases concretas.',
+    '- Anade rasgos, valores, gustos implicitos, objeciones y canal preferido utiles para investigacion.',
+    '- Devuelve una sola persona.'
+  ].join('\n')
+}
+
+export function testStimulusUserPromptWithScorecard(estimulo: string, tieneImagen = false, scorecardCriteria: string[] = []): string {
+  const base = testStimulusUserPrompt(estimulo, tieneImagen)
+  if (scorecardCriteria.length === 0) return base
+  return [
+    base,
+    '',
+    `Ademas puntua estos criterios del 1 al 10 en scorecardScores usando exactamente estas claves: ${scorecardCriteria.join(', ')}.`
+  ].join('\n')
+}
+
+export function funnelStageUserPromptWithScorecard(
+  etapa: EtapaFunnel,
+  historialPropio: EtapaPropiaHistorial[],
+  peerSummary?: string,
+  scorecardCriteria: string[] = []
+): string {
+  const base = funnelStageUserPrompt(etapa, historialPropio, peerSummary)
+  if (scorecardCriteria.length === 0) return base
+  return [
+    base,
+    '',
+    `Ademas puntua estos criterios del 1 al 10 en scorecardScores usando exactamente estas claves: ${scorecardCriteria.join(', ')}.`
+  ].join('\n')
+}

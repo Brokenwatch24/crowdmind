@@ -14,12 +14,15 @@ import type {
   FollowUpResultSummary,
   FunnelResultSummary,
   FunnelTemplate,
+  InterviewPersonaResult,
   MarketplacePanelTemplate,
   ModoInteraccion,
   Panel,
   PanelTimelinePoint,
   Persona,
   PersonaDraft,
+  PersonaGenerationInput,
+  PersonaImproveInput,
   PersonaVersion,
   ProviderId,
   ProviderSetting,
@@ -54,13 +57,16 @@ const api = {
     create: (panelId: string, draft: PersonaDraft): Promise<Persona> => ipcRenderer.invoke(IPC.personasCreate, panelId, draft),
     update: (id: string, draft: Partial<PersonaDraft>): Promise<Persona> => ipcRenderer.invoke(IPC.personasUpdate, id, draft),
     delete: (id: string): Promise<void> => ipcRenderer.invoke(IPC.personasDelete, id),
-    generatePreview: (input: {
+    generatePreview: (input: PersonaGenerationInput): Promise<PersonaDraft[]> => ipcRenderer.invoke(IPC.personasGeneratePreview, input),
+    improveDraft: (input: PersonaImproveInput): Promise<PersonaDraft> => ipcRenderer.invoke(IPC.personasImproveDraft, input),
+    runInterview: (input: {
       workspaceId: string
-      brief: string
+      panelId: string
+      guide: string
       count: number
       provider: ProviderId
       model?: string
-    }): Promise<PersonaDraft[]> => ipcRenderer.invoke(IPC.personasGeneratePreview, input),
+    }): Promise<InterviewPersonaResult[]> => ipcRenderer.invoke(IPC.personasRunInterview, input),
     saveBulk: (panelId: string, drafts: PersonaDraft[]): Promise<Persona[]> =>
       ipcRenderer.invoke(IPC.personasSaveBulk, panelId, drafts),
     pickCsvFile: (): Promise<CsvPreview | null> => ipcRenderer.invoke(IPC.personasPickCsvFile),
@@ -83,6 +89,7 @@ const api = {
       provider: ProviderId
       model?: string
       personaIds?: string[]
+      scorecardCriteria?: string[]
     }): Promise<TestResultSummary> => ipcRenderer.invoke(IPC.testsRunSimple, input),
     getNarrativeReport: (testId: string): Promise<string | null> => ipcRenderer.invoke(IPC.testsGetNarrativeReport, testId),
     exportPdf: (testId: string): Promise<{ success: boolean; filePath?: string }> => ipcRenderer.invoke(IPC.testsExportPdf, testId),
@@ -123,6 +130,7 @@ const api = {
       provider: ProviderId
       model?: string
       personaIds?: string[]
+      scorecardCriteria?: string[]
     }): Promise<FunnelResultSummary> => ipcRenderer.invoke(IPC.funnelRun, input),
     listTemplates: (): Promise<FunnelTemplate[]> => ipcRenderer.invoke(IPC.funnelTemplatesList)
   },
@@ -174,6 +182,8 @@ const api = {
       ipcRenderer.invoke(IPC.settingsClearApiKey, input),
     setDefaultModel: (input: { provider: ProviderId; workspaceId: string | null; model: string }): Promise<void> =>
       ipcRenderer.invoke(IPC.settingsSetDefaultModel, input),
+    testProvider: (input: { provider: ProviderId; workspaceId: string | null }): Promise<{ ok: boolean; message: string }> =>
+      ipcRenderer.invoke(IPC.settingsTestProvider, input),
     isEncryptionAvailable: (): Promise<boolean> => ipcRenderer.invoke(IPC.settingsIsEncryptionAvailable)
   }
 }

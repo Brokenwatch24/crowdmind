@@ -17,6 +17,8 @@ export const IPC = {
   personasUpdate: 'personas:update',
   personasDelete: 'personas:delete',
   personasGeneratePreview: 'personas:generatePreview',
+  personasImproveDraft: 'personas:improveDraft',
+  personasRunInterview: 'personas:runInterview',
   personasSaveBulk: 'personas:saveBulk',
   personasPickCsvFile: 'personas:pickCsvFile',
   personasImportCsvPreview: 'personas:importCsvPreview',
@@ -70,5 +72,6 @@ export const IPC = {
   settingsSetApiKey: 'settings:setApiKey',
   settingsClearApiKey: 'settings:clearApiKey',
   settingsSetDefaultModel: 'settings:setDefaultModel',
+  settingsTestProvider: 'settings:testProvider',
   settingsIsEncryptionAvailable: 'settings:isEncryptionAvailable'
 } as const

@@ -27,6 +27,7 @@ function toTest(row: typeof tests.$inferSelect): CrowdmindTest {
     estimuloTipo: row.estimuloTipo as EstimuloTipo,
     estimuloContenido: row.estimuloContenido,
     estimuloMetadata: JSON.parse(row.estimuloMetadataJson) as EstimuloMetadata,
+    scorecardCriteria: JSON.parse(row.scorecardCriteriaJson ?? '[]') as string[],
     resumenEjecutivo: row.resumenEjecutivo,
     disclaimers: JSON.parse(row.disclaimersJson) as string[],
     indiceConfianza: row.indiceConfianza,
@@ -44,6 +45,7 @@ function toRespuesta(row: typeof respuestas.$inferSelect): Respuesta {
     avanzoASiguienteEtapa: row.avanzoASiguienteEtapa,
     personaVersionId: row.personaVersionId,
     scoreSatisfaccion: row.scoreSatisfaccion,
+    scorecardScores: JSON.parse(row.scorecardScoresJson ?? '{}') as Record<string, number>,
     opinionTexto: row.opinionTexto,
     objeciones: JSON.parse(row.objecionesJson) as string[],
     aspectosPositivos: JSON.parse(row.aspectosPositivosJson) as string[],
@@ -72,6 +74,7 @@ export function createTest(input: {
   estimuloTipo: EstimuloTipo
   estimuloContenido: string
   estimuloMetadata?: EstimuloMetadata
+  scorecardCriteria?: string[]
 }): CrowdmindTest {
   const row = {
     id: newId(),
@@ -83,6 +86,7 @@ export function createTest(input: {
     estimuloTipo: input.estimuloTipo,
     estimuloContenido: input.estimuloContenido,
     estimuloMetadataJson: JSON.stringify(input.estimuloMetadata ?? {}),
+    scorecardCriteriaJson: JSON.stringify(input.scorecardCriteria ?? []),
     resumenEjecutivo: null,
     disclaimersJson: '[]',
     indiceConfianza: null,
@@ -106,8 +110,8 @@ export function setConfianza(testId: string, indiceConfianza: number, disclaimer
 }
 
 export function saveRespuesta(
-  input: Omit<Respuesta, 'id' | 'createdAt' | 'etapaFunnelId' | 'avanzoASiguienteEtapa' | 'personaVersionId'> &
-    Partial<Pick<Respuesta, 'etapaFunnelId' | 'avanzoASiguienteEtapa' | 'personaVersionId'>>
+  input: Omit<Respuesta, 'id' | 'createdAt' | 'etapaFunnelId' | 'avanzoASiguienteEtapa' | 'personaVersionId' | 'scorecardScores'> &
+    Partial<Pick<Respuesta, 'etapaFunnelId' | 'avanzoASiguienteEtapa' | 'personaVersionId' | 'scorecardScores'>>
 ): Respuesta {
   const row = {
     id: newId(),
@@ -117,6 +121,7 @@ export function saveRespuesta(
     avanzoASiguienteEtapa: input.avanzoASiguienteEtapa ?? null,
     personaVersionId: input.personaVersionId ?? null,
     scoreSatisfaccion: input.scoreSatisfaccion,
+    scorecardScoresJson: JSON.stringify(input.scorecardScores ?? {}),
     opinionTexto: input.opinionTexto,
     objecionesJson: JSON.stringify(input.objeciones ?? []),
     aspectosPositivosJson: JSON.stringify(input.aspectosPositivos ?? []),
@@ -152,5 +157,28 @@ export function getTestResults(testId: string): TestResultSummary | null {
     distribucion[sentimentBucket(r.scoreSatisfaccion)]++
   }
 
-  return { test, respuestas: respuestasConPersona, scorePromedio, distribucion }
+  const scorecardPromedios: Record<string, number> = {}
+  for (const criterio of test.scorecardCriteria) {
+    const values = respuestasConPersona
+      .map((r) => r.scorecardScores[criterio])
+      .filter((v): v is number => typeof v === 'number' && Number.isFinite(v))
+    if (values.length) scorecardPromedios[criterio] = values.reduce((a, b) => a + b, 0) / values.length
+  }
+
+  const previous = listTests(test.panelId)
+    .filter((t) => t.id !== test.id && t.createdAt < test.createdAt)
+    .map((t) => {
+      const r = listRespuestasForTest(t.id).filter((x) => !x.etapaFunnelId)
+      const s = r.map((x) => x.scoreSatisfaccion)
+      return s.length ? s.reduce((a, b) => a + b, 0) / s.length : null
+    })
+    .filter((v): v is number => v !== null)
+  const previousAverage = previous.length ? previous.reduce((a, b) => a + b, 0) / previous.length : null
+  const benchmark = {
+    previousTests: previous.length,
+    previousAverage,
+    delta: previousAverage === null ? null : scorePromedio - previousAverage
+  }
+
+  return { test, respuestas: respuestasConPersona, scorePromedio, distribucion, scorecardPromedios, benchmark }
 }

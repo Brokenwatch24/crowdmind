@@ -31,6 +31,7 @@ export function registerTestHandlers(): void {
         provider: ProviderId
         model?: string
         personaIds?: string[]
+        scorecardCriteria?: string[]
       }
     ) => {
       const test = testsRepo.createTest({
@@ -39,7 +40,8 @@ export function registerTestHandlers(): void {
         nombre: input.nombre,
         estimuloTipo: input.estimuloTipo ?? 'texto',
         estimuloContenido: input.estimuloContenido,
-        estimuloMetadata: input.imagenDataUri ? { imagenDataUri: input.imagenDataUri } : {}
+        estimuloMetadata: input.imagenDataUri ? { imagenDataUri: input.imagenDataUri } : {},
+        scorecardCriteria: input.scorecardCriteria ?? []
       })
 
       const personas = input.personaIds?.length
@@ -49,12 +51,19 @@ export function registerTestHandlers(): void {
       await runWithConcurrencyLimit(personas, CONCURRENCY, async (persona) => {
         const call = resolveCallForPersona(persona, input.workspaceId, input.provider, input.model)
         try {
-          const respuesta = await getPersonaResponseToStimulus(call, persona, input.estimuloContenido, input.imagenDataUri)
+          const respuesta = await getPersonaResponseToStimulus(
+            call,
+            persona,
+            input.estimuloContenido,
+            input.imagenDataUri,
+            input.scorecardCriteria ?? []
+          )
           testsRepo.saveRespuesta({
             testId: test.id,
             personaId: persona.id,
             personaVersionId: getLatestPersonaVersionId(persona.id),
             scoreSatisfaccion: respuesta.scoreSatisfaccion,
+            scorecardScores: respuesta.scorecardScores,
             opinionTexto: respuesta.opinionTexto,
             objeciones: respuesta.objeciones,
             aspectosPositivos: respuesta.aspectosPositivos,
@@ -66,6 +75,7 @@ export function registerTestHandlers(): void {
             testId: test.id,
             personaId: persona.id,
             scoreSatisfaccion: 1,
+            scorecardScores: {},
             opinionTexto: `⚠️ No se pudo obtener respuesta: ${err instanceof Error ? err.message : String(err)}`,
             objeciones: [],
             aspectosPositivos: [],

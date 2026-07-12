@@ -1,6 +1,6 @@
 {
   "name": "crowdmind",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Local-first desktop app for simulating AI persona panels and testing stimuli against them.",
   "main": "./out/main/index.js",
   "author": "Crowdmind contributors",
@@ -23,6 +23,8 @@
     "db:generate": "drizzle-kit generate",
     "start": "electron-vite preview",
     "smoke-test": "esbuild scripts/smokeTest.ts --bundle --platform=node --target=node20 --external:electron --external:better-sqlite3 --tsconfig=tsconfig.node.json --format=cjs --outfile=.tmp/smokeTest.bundle.cjs && electron .tmp/smokeTest.bundle.cjs",
+    "mcp:build": "esbuild src/mcp/server.ts --bundle --platform=node --target=node22 --tsconfig=tsconfig.node.json --format=cjs --outfile=.tmp/crowdmind-mcp.cjs",
+    "mcp": "npm run mcp:build && node --no-warnings .tmp/crowdmind-mcp.cjs",
     "dist": "npm run build && electron-builder --publish=never",
     "dist:win": "npm run build && electron-builder --win --publish=never",
     "dist:mac": "npm run build && electron-builder --mac --publish=never",

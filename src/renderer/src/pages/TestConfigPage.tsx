@@ -35,6 +35,7 @@ export function TestConfigPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [nombre, setNombre] = useState('')
   const [estimulo, setEstimulo] = useState('')
+  const [scorecardInput, setScorecardInput] = useState('claridad, confianza, intencion de compra')
   const [imagenDataUri, setImagenDataUri] = useState<string | null>(null)
   const [estimuloMode, setEstimuloMode] = useState<EstimuloMode>('single')
   const [modoInteraccion, setModoInteraccion] = useState<ModoInteraccion>('individual')
@@ -76,6 +77,11 @@ export function TestConfigPage() {
     stimulusChars,
     stageCount: estimuloMode === 'sequence' ? etapas.length : 1
   })
+  const scorecardCriteria = scorecardInput
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .slice(0, 8)
 
   async function handleRun() {
     if (!workspaceId || !panelId || !isValid || selected.size === 0) return
@@ -91,7 +97,8 @@ export function TestConfigPage() {
           imagenDataUri: imagenDataUri ?? undefined,
           provider,
           model: model ?? undefined,
-          personaIds: Array.from(selected)
+          personaIds: Array.from(selected),
+          scorecardCriteria
         })
         navigate(`/w/${workspaceId}/panels/${panelId}/tests/${result.test.id}`)
       } else {
@@ -103,7 +110,8 @@ export function TestConfigPage() {
           etapas,
           provider,
           model: model ?? undefined,
-          personaIds: Array.from(selected)
+          personaIds: Array.from(selected),
+          scorecardCriteria
         })
         navigate(`/w/${workspaceId}/panels/${panelId}/tests/${result.test.id}/funnel`)
       }
@@ -192,6 +200,16 @@ export function TestConfigPage() {
               <FunnelBuilder etapas={etapas} onChange={setEtapas} />
             </div>
           )}
+          <div>
+            <Label htmlFor="scorecard">{t('testConfig.scorecardLabel')}</Label>
+            <Input
+              id="scorecard"
+              className="mt-1.5"
+              value={scorecardInput}
+              onChange={(e) => setScorecardInput(e.target.value)}
+              placeholder={t('testConfig.scorecardPlaceholder')}
+            />
+          </div>
         </div>
       </Card>
 

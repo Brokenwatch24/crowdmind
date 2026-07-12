@@ -11,10 +11,17 @@ export const PROVIDER_LABELS: Record<ProviderId, string> = {
 }
 
 export const PROVIDER_DEFAULT_MODELS: Record<ProviderId, string[]> = {
-  openai: ['gpt-4o-mini', 'gpt-4o', 'gpt-4.1-mini'],
-  anthropic: ['claude-sonnet-5', 'claude-haiku-4-5-20251001', 'claude-opus-4-8'],
-  gemini: ['gemini-2.5-flash', 'gemini-2.5-pro'],
-  openrouter: ['openai/gpt-4o-mini', 'anthropic/claude-sonnet-5', 'meta-llama/llama-3.1-70b-instruct'],
+  openai: ['gpt-4o-mini', 'gpt-4o', 'gpt-4.1-mini', 'gpt-4.1', 'gpt-4.1-nano', 'o4-mini', 'o3-mini'],
+  anthropic: ['claude-sonnet-5', 'claude-haiku-4-5-20251001', 'claude-opus-4-8', 'claude-3-5-sonnet-latest', 'claude-3-5-haiku-latest'],
+  gemini: ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.0-flash', 'gemini-1.5-pro', 'gemini-1.5-flash'],
+  openrouter: [
+    'openai/gpt-4o-mini',
+    'openai/gpt-4.1',
+    'anthropic/claude-sonnet-5',
+    'google/gemini-2.5-pro',
+    'meta-llama/llama-3.1-70b-instruct',
+    'mistralai/mistral-large'
+  ],
   local: ['local-deterministic-v1']
 }
 
@@ -96,6 +103,38 @@ export type PersonaDraft = Omit<Persona, 'id' | 'panelId' | 'createdAt' | 'updat
   avatarImageDataUri?: string | null
 }
 
+export interface PersonaGenerationInput {
+  workspaceId: string
+  panelId: string
+  count: number
+  audience: string
+  market: string
+  productContext: string
+  researchGoal: string
+  mustInclude: string
+  mustAvoid: string
+  diversityAxes: string
+  tone: string
+  notes: string
+  batchNonce: string
+  provider: ProviderId
+  model?: string
+}
+
+export interface PersonaImproveInput {
+  workspaceId: string
+  draft: PersonaDraft
+  instructions: string
+  provider: ProviderId
+  model?: string
+}
+
+export interface InterviewPersonaResult {
+  personaId: string
+  personaNombre: string
+  respuesta: string
+}
+
 export type PersonaSnapshot = Omit<Persona, 'id' | 'panelId' | 'createdAt' | 'updatedAt'>
 
 export interface PersonaVersion {
@@ -143,6 +182,7 @@ export interface CrowdmindTest {
   estimuloTipo: EstimuloTipo
   estimuloContenido: string
   estimuloMetadata: EstimuloMetadata
+  scorecardCriteria: string[]
   resumenEjecutivo: string | null
   disclaimers: string[]
   indiceConfianza: number | null
@@ -158,6 +198,7 @@ export interface Respuesta {
   avanzoASiguienteEtapa: boolean | null
   personaVersionId: string | null
   scoreSatisfaccion: number
+  scorecardScores: Record<string, number>
   opinionTexto: string
   objeciones: string[]
   aspectosPositivos: string[]
@@ -183,6 +224,8 @@ export interface TestResultSummary {
   respuestas: RespuestaConPersona[]
   scorePromedio: number
   distribucion: { positivo: number; neutro: number; negativo: number }
+  scorecardPromedios: Record<string, number>
+  benchmark: { previousTests: number; previousAverage: number | null; delta: number | null }
 }
 
 export interface FunnelStageResult {

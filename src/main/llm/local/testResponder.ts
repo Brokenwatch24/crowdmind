@@ -32,12 +32,13 @@ const ASPECTOS_POSITIVOS_POOL = [
 
 export interface LocalRespuesta {
   scoreSatisfaccion: number
+  scorecardScores: Record<string, number>
   opinionTexto: string
   objeciones: string[]
   aspectosPositivos: string[]
 }
 
-export function respondToStimulusLocal(persona: Persona, estimulo: string, tieneImagen = false): LocalRespuesta {
+export function respondToStimulusLocal(persona: Persona, estimulo: string, tieneImagen = false, scorecardCriteria: string[] = []): LocalRespuesta {
   const seed = hashSeed(`${persona.id}::${estimulo}::${tieneImagen}`)
   const rng = mulberry32(seed)
 
@@ -54,5 +55,12 @@ export function respondToStimulusLocal(persona: Persona, estimulo: string, tiene
     esPositivo ? 'valoro' : 'me preocupa'
   } ${aspectosPositivos[0] ?? 'la propuesta'}${objeciones.length ? `, aunque ${objeciones[0]}` : ''}.`
 
-  return { scoreSatisfaccion, opinionTexto, objeciones, aspectosPositivos }
+  const scorecardScores = Object.fromEntries(
+    scorecardCriteria.map((criterio, idx) => {
+      const delta = randomInt(mulberry32(hashSeed(`${persona.id}::${estimulo}::${criterio}::${idx}`)), -1, 1)
+      return [criterio, Math.min(10, Math.max(1, scoreSatisfaccion + delta))]
+    })
+  )
+
+  return { scoreSatisfaccion, scorecardScores, opinionTexto, objeciones, aspectosPositivos }
 }

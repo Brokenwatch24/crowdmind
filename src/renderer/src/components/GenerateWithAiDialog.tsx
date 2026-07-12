@@ -23,7 +23,15 @@ export function GenerateWithAiDialog({
   const provider = useAppStore((s) => s.currentProvider)
   const model = useAppStore((s) => s.currentModel)
   const [open, setOpen] = useState(false)
-  const [brief, setBrief] = useState('')
+  const [audience, setAudience] = useState('')
+  const [market, setMarket] = useState('')
+  const [productContext, setProductContext] = useState('')
+  const [researchGoal, setResearchGoal] = useState('')
+  const [mustInclude, setMustInclude] = useState('')
+  const [mustAvoid, setMustAvoid] = useState('')
+  const [diversityAxes, setDiversityAxes] = useState('')
+  const [tone, setTone] = useState('profesional, especifico y accionable')
+  const [notes, setNotes] = useState('')
   const [count, setCount] = useState(5)
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -31,16 +39,33 @@ export function GenerateWithAiDialog({
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
   const t = useT()
+  const canGenerate = audience.trim().length > 0 || productContext.trim().length > 0 || researchGoal.trim().length > 0
+
+  function distribution(key: 'nivelIngreso' | 'disposicionBase' | 'pais' | 'genero') {
+    const counts = new Map<string, number>()
+    for (const p of preview ?? []) counts.set(String(p[key] || 'sin dato'), (counts.get(String(p[key] || 'sin dato')) ?? 0) + 1)
+    return [...counts.entries()].sort((a, b) => b[1] - a[1])
+  }
 
   async function handleGenerate() {
-    if (!brief.trim()) return
+    if (!canGenerate) return
     setLoading(true)
     setError(null)
     try {
       const result = await api.personas.generatePreview({
         workspaceId,
-        brief,
+        panelId,
         count,
+        audience,
+        market,
+        productContext,
+        researchGoal,
+        mustInclude,
+        mustAvoid,
+        diversityAxes,
+        tone,
+        notes,
+        batchNonce: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
         provider,
         model: model ?? undefined
       })
@@ -59,7 +84,15 @@ export function GenerateWithAiDialog({
       await api.personas.saveBulk(panelId, preview)
       setOpen(false)
       setPreview(null)
-      setBrief('')
+      setAudience('')
+      setMarket('')
+      setProductContext('')
+      setResearchGoal('')
+      setMustInclude('')
+      setMustAvoid('')
+      setDiversityAxes('')
+      setTone('profesional, especifico y accionable')
+      setNotes('')
       onSaved()
     } finally {
       setSaving(false)
@@ -86,36 +119,102 @@ export function GenerateWithAiDialog({
           <Sparkles size={14} /> {t('genAi.button')}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-3xl">
         <DialogTitle>{t('genAi.title')}</DialogTitle>
 
         {!preview ? (
           <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor="audience">{t('genAi.audienceLabel')}</Label>
+                <Textarea
+                  id="audience"
+                  className="mt-1.5"
+                  rows={3}
+                  value={audience}
+                  onChange={(e) => setAudience(e.target.value)}
+                  placeholder={t('genAi.audiencePlaceholder')}
+                />
+              </div>
+              <div>
+                <Label htmlFor="productContext">{t('genAi.productLabel')}</Label>
+                <Textarea
+                  id="productContext"
+                  className="mt-1.5"
+                  rows={3}
+                  value={productContext}
+                  onChange={(e) => setProductContext(e.target.value)}
+                  placeholder={t('genAi.productPlaceholder')}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor="market">{t('genAi.marketLabel')}</Label>
+                <Input id="market" className="mt-1.5" value={market} onChange={(e) => setMarket(e.target.value)} placeholder={t('genAi.marketPlaceholder')} />
+              </div>
+              <div>
+                <Label htmlFor="researchGoal">{t('genAi.goalLabel')}</Label>
+                <Input
+                  id="researchGoal"
+                  className="mt-1.5"
+                  value={researchGoal}
+                  onChange={(e) => setResearchGoal(e.target.value)}
+                  placeholder={t('genAi.goalPlaceholder')}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor="mustInclude">{t('genAi.includeLabel')}</Label>
+                <Input id="mustInclude" className="mt-1.5" value={mustInclude} onChange={(e) => setMustInclude(e.target.value)} />
+              </div>
+              <div>
+                <Label htmlFor="mustAvoid">{t('genAi.avoidLabel')}</Label>
+                <Input id="mustAvoid" className="mt-1.5" value={mustAvoid} onChange={(e) => setMustAvoid(e.target.value)} />
+              </div>
+            </div>
             <div>
-              <Label htmlFor="brief">{t('genAi.briefLabel')}</Label>
-              <Textarea
-                id="brief"
+              <Label htmlFor="diversityAxes">{t('genAi.diversityLabel')}</Label>
+              <Input
+                id="diversityAxes"
                 className="mt-1.5"
-                rows={4}
-                value={brief}
-                onChange={(e) => setBrief(e.target.value)}
-                placeholder={t('genAi.briefPlaceholder')}
+                value={diversityAxes}
+                onChange={(e) => setDiversityAxes(e.target.value)}
+                placeholder={t('genAi.diversityPlaceholder')}
               />
             </div>
-            <div className="w-32">
-              <Label htmlFor="count">{t('genAi.countLabel')}</Label>
-              <Input
-                id="count"
-                type="number"
-                min={1}
-                max={30}
+            <div>
+              <Label htmlFor="notes">{t('genAi.notesLabel')}</Label>
+              <Textarea
+                id="notes"
                 className="mt-1.5"
-                value={count}
-                onChange={(e) => setCount(Math.min(30, Math.max(1, Number(e.target.value) || 1)))}
+                rows={2}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder={t('genAi.notesPlaceholder')}
               />
+            </div>
+            <div className="grid grid-cols-[8rem_1fr] gap-3">
+              <div>
+                <Label htmlFor="count">{t('genAi.countLabel')}</Label>
+                <Input
+                  id="count"
+                  type="number"
+                  min={1}
+                  max={30}
+                  className="mt-1.5"
+                  value={count}
+                  onChange={(e) => setCount(Math.min(30, Math.max(1, Number(e.target.value) || 1)))}
+                />
+              </div>
+              <div>
+                <Label htmlFor="tone">{t('genAi.toneLabel')}</Label>
+                <Input id="tone" className="mt-1.5" value={tone} onChange={(e) => setTone(e.target.value)} />
+              </div>
             </div>
             {error && <div className="text-xs text-danger">{error}</div>}
-            <Button className="w-full" onClick={handleGenerate} disabled={loading || !brief.trim()}>
+            <Button className="w-full" onClick={handleGenerate} disabled={loading || !canGenerate}>
               {loading ? t('genAi.generating') : t('genAi.generate', { count })}
             </Button>
           </div>
@@ -131,6 +230,21 @@ export function GenerateWithAiDialog({
         ) : (
           <div className="space-y-3">
             <div className="text-xs text-text-muted">{t('genAi.reviewHint', { count: preview.length })}</div>
+            <div className="grid grid-cols-2 gap-2 rounded-lg border border-border bg-surface p-3 text-xs text-text-muted sm:grid-cols-4">
+              {(['nivelIngreso', 'disposicionBase', 'pais', 'genero'] as const).map((key) => (
+                <div key={key}>
+                  <div className="mb-1 font-mono-label text-[10px] uppercase text-text-dim">{t(`genAi.diversity.${key}`)}</div>
+                  <div className="space-y-0.5">
+                    {distribution(key).map(([label, value]) => (
+                      <div key={label} className="flex justify-between gap-2">
+                        <span className="truncate">{label}</span>
+                        <span className="font-semibold text-text">{value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
             <div className="max-h-96 space-y-2 overflow-y-auto">
               {preview.map((p, idx) => (
                 <div key={idx} className="flex items-start justify-between gap-3 rounded-lg border border-border bg-bg p-3">

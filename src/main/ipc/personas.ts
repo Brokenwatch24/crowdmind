@@ -1,9 +1,9 @@
 import { ipcMain, BrowserWindow, dialog } from 'electron'
 import { IPC } from '@shared/ipcChannels'
-import type { CsvColumnMapping, CsvPreview, PersonaDraft, ProviderId } from '@shared/types'
+import type { CsvColumnMapping, CsvPreview, InterviewPersonaResult, PersonaDraft, PersonaGenerationInput, PersonaImproveInput, ProviderId } from '@shared/types'
 import * as personasRepo from '../db/repo/personas'
-import { generatePersonasWithAi } from '../llm/useCases'
-import { resolveCall } from '../llm/resolveCall'
+import { generatePersonasWithAi, getPersonaChatReply, improvePersonaDraftWithAi } from '../llm/useCases'
+import { resolveCall, resolveCallForPersona } from '../llm/resolveCall'
 import { readCsvPreview, parseCsvToPersonaDrafts } from '../csv/csvImport'
 import { generatePersonaAvatarImage } from '../avatarImage/generateAvatarImage'
 import { resolveProviderCredentials } from '../db/repo/providerSettings'
@@ -17,9 +17,38 @@ export function registerPersonaHandlers(): void {
 
   ipcMain.handle(
     IPC.personasGeneratePreview,
-    async (_e, input: { workspaceId: string; brief: string; count: number; provider: ProviderId; model?: string }) => {
+    async (_e, input: PersonaGenerationInput | { workspaceId: string; brief: string; count: number; provider: ProviderId; model?: string }) => {
       const call = resolveCall(input.workspaceId, input.provider, input.model)
+      if ('panelId' in input) {
+        const existing = personasRepo.listPersonas(input.panelId)
+        return generatePersonasWithAi(call, input, undefined, existing)
+      }
       return generatePersonasWithAi(call, input.brief, input.count)
+    }
+  )
+  ipcMain.handle(IPC.personasImproveDraft, async (_e, input: PersonaImproveInput) => {
+    const call = resolveCall(input.workspaceId, input.provider, input.model)
+    return improvePersonaDraftWithAi(call, input.draft, input.instructions)
+  })
+  ipcMain.handle(
+    IPC.personasRunInterview,
+    async (
+      _e,
+      input: { workspaceId: string; panelId: string; guide: string; count: number; provider: ProviderId; model?: string }
+    ): Promise<InterviewPersonaResult[]> => {
+      const personas = personasRepo.listPersonas(input.panelId).slice(0, Math.max(1, Math.min(20, input.count || 5)))
+      return Promise.all(
+        personas.map(async (persona) => {
+          const call = resolveCallForPersona(persona, input.workspaceId, input.provider, input.model)
+          const respuesta = await getPersonaChatReply(
+            call,
+            persona,
+            [],
+            `Responde esta entrevista de investigacion como una respuesta integrada, concreta y accionable:\n${input.guide}`
+          )
+          return { personaId: persona.id, personaNombre: persona.nombre, respuesta }
+        })
+      )
     }
   )
   ipcMain.handle(IPC.personasSaveBulk, (_e, panelId: string, drafts: PersonaDraft[]) =>

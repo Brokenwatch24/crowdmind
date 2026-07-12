@@ -16,6 +16,8 @@ interface ReportData {
   respuestas: RespuestaConPersona[]
   scorePromedio: number
   distribucion: { positivo: number; neutro: number; negativo: number }
+  scorecardPromedios: Record<string, number>
+  benchmark: { previousTests: number; previousAverage: number | null; delta: number | null }
   temas: TemaTest[]
   nivel: ReturnType<typeof confidenceLevel>
   topObjeciones: Array<[string, number]>
@@ -28,7 +30,7 @@ function gatherReportData(testId: string): ReportData | null {
   if (!results) return null
   const temas = listTemas(testId)
 
-  const { test, respuestas, scorePromedio, distribucion } = results
+  const { test, respuestas, scorePromedio, distribucion, scorecardPromedios, benchmark } = results
   const nivel = confidenceLevel(test.indiceConfianza)
 
   const objecionCounts = new Map<string, number>()
@@ -48,14 +50,14 @@ function gatherReportData(testId: string): ReportData | null {
   )
   if (recomendaciones.length === 0) recomendaciones.push('No se registraron objeciones recurrentes relevantes en este test.')
 
-  return { test, respuestas, scorePromedio, distribucion, temas, nivel, topObjeciones, porDisposicion, recomendaciones }
+  return { test, respuestas, scorePromedio, distribucion, scorecardPromedios, benchmark, temas, nivel, topObjeciones, porDisposicion, recomendaciones }
 }
 
 /** Builds a self-contained HTML report — no external assets, safe to printToPDF or preview directly. */
 export function generarReporteNarrativoHtml(testId: string): string | null {
   const data = gatherReportData(testId)
   if (!data) return null
-  const { test, respuestas, scorePromedio, distribucion, temas, nivel, porDisposicion, recomendaciones } = data
+  const { test, respuestas, scorePromedio, distribucion, scorecardPromedios, benchmark, temas, nivel, porDisposicion, recomendaciones } = data
 
   return `<!doctype html>
 <html lang="es"><head><meta charset="utf-8" />
@@ -88,6 +90,18 @@ export function generarReporteNarrativoHtml(testId: string): string | null {
     <div class="stat"><b>${distribucion.negativo}</b>NEGATIVAS</div>
   </div>
   ${test.resumenEjecutivo ? `<p>${escapeHtml(test.resumenEjecutivo)}</p>` : ''}
+  ${
+    benchmark.previousTests > 0
+      ? `<p><strong>Benchmark:</strong> ${benchmark.delta !== null && benchmark.delta >= 0 ? '+' : ''}${benchmark.delta?.toFixed(1)} puntos vs. el promedio histÃ³rico del panel (${benchmark.previousAverage?.toFixed(1)}/10 en ${benchmark.previousTests} tests previos).</p>`
+      : ''
+  }
+  ${
+    Object.keys(scorecardPromedios).length > 0
+      ? `<p><strong>Scorecard:</strong> ${Object.entries(scorecardPromedios)
+          .map(([k, v]) => `${escapeHtml(k)} ${v.toFixed(1)}/10`)
+          .join(' Â· ')}</p>`
+      : ''
+  }
   ${
     temas.length > 0
       ? `<p><strong>Temas recurrentes:</strong></p><p>${temas.map((t) => `<span class="tag">${escapeHtml(t.nombreTema)} (${t.cantidadMenciones})</span>`).join('')}</p>`
@@ -122,7 +136,7 @@ export function generarReporteNarrativoHtml(testId: string): string | null {
 export function generarReporteNarrativoMarkdown(testId: string): string | null {
   const data = gatherReportData(testId)
   if (!data) return null
-  const { test, respuestas, scorePromedio, distribucion, temas, nivel, porDisposicion, recomendaciones } = data
+  const { test, respuestas, scorePromedio, distribucion, scorecardPromedios, benchmark, temas, nivel, porDisposicion, recomendaciones } = data
 
   const lines: string[] = []
   lines.push(`# Reporte de investigación — "${test.nombre}"`)
@@ -146,6 +160,16 @@ export function generarReporteNarrativoMarkdown(testId: string): string | null {
   if (test.resumenEjecutivo) {
     lines.push('')
     lines.push(test.resumenEjecutivo)
+  }
+  if (benchmark.previousTests > 0) {
+    lines.push('')
+    lines.push(
+      `**Benchmark**: ${benchmark.delta !== null && benchmark.delta >= 0 ? '+' : ''}${benchmark.delta?.toFixed(1)} puntos vs. promedio historico del panel (${benchmark.previousAverage?.toFixed(1)}/10 en ${benchmark.previousTests} tests previos).`
+    )
+  }
+  if (Object.keys(scorecardPromedios).length > 0) {
+    lines.push('')
+    lines.push(`**Scorecard**: ${Object.entries(scorecardPromedios).map(([k, v]) => `${k} ${v.toFixed(1)}/10`).join(' · ')}`)
   }
   if (temas.length > 0) {
     lines.push('')
