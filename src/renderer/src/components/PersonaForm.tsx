@@ -1,0 +1,177 @@
+import { useState } from 'react'
+import type { PersonaDraft } from '@shared/types'
+import { DISPOSICIONES, NIVELES_INGRESO } from '@shared/types'
+import { Input } from '@renderer/components/ui/input'
+import { Textarea } from '@renderer/components/ui/textarea'
+import { Label } from '@renderer/components/ui/label'
+import { Button } from '@renderer/components/ui/button'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@renderer/components/ui/select'
+import { tagsToString, stringToTags } from '@renderer/lib/csv'
+
+const EMPTY: PersonaDraft = {
+  nombre: '',
+  edad: 30,
+  genero: '',
+  ciudad: '',
+  pais: '',
+  ocupacion: '',
+  nivelIngreso: 'medio',
+  nivelEducativo: '',
+  estadoCivil: '',
+  disposicionBase: 'neutro',
+  rasgos: [],
+  valores: [],
+  historiaPersonal: '',
+  objecionesTipicas: [],
+  canalPreferido: '',
+  llmProviderOverride: null,
+  llmModelOverride: null
+}
+
+export function PersonaForm({
+  initial,
+  onSubmit,
+  submitLabel = 'Guardar persona'
+}: {
+  initial?: Partial<PersonaDraft>
+  onSubmit: (draft: PersonaDraft) => void | Promise<void>
+  submitLabel?: string
+}) {
+  const [draft, setDraft] = useState<PersonaDraft>({ ...EMPTY, ...initial })
+  const [saving, setSaving] = useState(false)
+
+  function set<K extends keyof PersonaDraft>(key: K, value: PersonaDraft[K]) {
+    setDraft((prev) => ({ ...prev, [key]: value }))
+  }
+
+  async function handleSubmit() {
+    if (!draft.nombre.trim()) return
+    setSaving(true)
+    try {
+      await onSubmit(draft)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label htmlFor="p-nombre">Nombre</Label>
+          <Input id="p-nombre" className="mt-1.5" value={draft.nombre} onChange={(e) => set('nombre', e.target.value)} />
+        </div>
+        <div>
+          <Label htmlFor="p-edad">Edad</Label>
+          <Input
+            id="p-edad"
+            type="number"
+            className="mt-1.5"
+            value={draft.edad}
+            onChange={(e) => set('edad', Number(e.target.value) || 0)}
+          />
+        </div>
+        <div>
+          <Label htmlFor="p-genero">Género</Label>
+          <Input id="p-genero" className="mt-1.5" value={draft.genero} onChange={(e) => set('genero', e.target.value)} />
+        </div>
+        <div>
+          <Label htmlFor="p-ciudad">Ciudad</Label>
+          <Input id="p-ciudad" className="mt-1.5" value={draft.ciudad} onChange={(e) => set('ciudad', e.target.value)} />
+        </div>
+        <div>
+          <Label htmlFor="p-pais">País</Label>
+          <Input id="p-pais" className="mt-1.5" value={draft.pais} onChange={(e) => set('pais', e.target.value)} />
+        </div>
+        <div>
+          <Label htmlFor="p-ocupacion">Ocupación</Label>
+          <Input id="p-ocupacion" className="mt-1.5" value={draft.ocupacion} onChange={(e) => set('ocupacion', e.target.value)} />
+        </div>
+        <div>
+          <Label>Nivel de ingreso</Label>
+          <Select value={draft.nivelIngreso} onValueChange={(v) => set('nivelIngreso', v as PersonaDraft['nivelIngreso'])}>
+            <SelectTrigger className="mt-1.5 w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {NIVELES_INGRESO.map((n) => (
+                <SelectItem key={n} value={n}>
+                  {n}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>Disposición base</Label>
+          <Select value={draft.disposicionBase} onValueChange={(v) => set('disposicionBase', v as PersonaDraft['disposicionBase'])}>
+            <SelectTrigger className="mt-1.5 w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {DISPOSICIONES.map((d) => (
+                <SelectItem key={d} value={d}>
+                  {d}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label htmlFor="p-educ">Nivel educativo</Label>
+          <Input id="p-educ" className="mt-1.5" value={draft.nivelEducativo} onChange={(e) => set('nivelEducativo', e.target.value)} />
+        </div>
+        <div>
+          <Label htmlFor="p-civil">Estado civil</Label>
+          <Input id="p-civil" className="mt-1.5" value={draft.estadoCivil} onChange={(e) => set('estadoCivil', e.target.value)} />
+        </div>
+        <div>
+          <Label htmlFor="p-canal">Canal preferido</Label>
+          <Input id="p-canal" className="mt-1.5" value={draft.canalPreferido} onChange={(e) => set('canalPreferido', e.target.value)} />
+        </div>
+      </div>
+
+      <div>
+        <Label htmlFor="p-rasgos">Rasgos (separados por coma)</Label>
+        <Input
+          id="p-rasgos"
+          className="mt-1.5"
+          value={tagsToString(draft.rasgos)}
+          onChange={(e) => set('rasgos', stringToTags(e.target.value))}
+        />
+      </div>
+      <div>
+        <Label htmlFor="p-valores">Valores (separados por coma)</Label>
+        <Input
+          id="p-valores"
+          className="mt-1.5"
+          value={tagsToString(draft.valores)}
+          onChange={(e) => set('valores', stringToTags(e.target.value))}
+        />
+      </div>
+      <div>
+        <Label htmlFor="p-objeciones">Objeciones típicas (separadas por coma)</Label>
+        <Input
+          id="p-objeciones"
+          className="mt-1.5"
+          value={tagsToString(draft.objecionesTipicas)}
+          onChange={(e) => set('objecionesTipicas', stringToTags(e.target.value))}
+        />
+      </div>
+      <div>
+        <Label htmlFor="p-historia">Historia personal</Label>
+        <Textarea
+          id="p-historia"
+          className="mt-1.5"
+          rows={4}
+          value={draft.historiaPersonal}
+          onChange={(e) => set('historiaPersonal', e.target.value)}
+        />
+      </div>
+
+      <Button className="w-full" onClick={handleSubmit} disabled={saving || !draft.nombre.trim()}>
+        {saving ? 'Guardando…' : submitLabel}
+      </Button>
+    </div>
+  )
+}
