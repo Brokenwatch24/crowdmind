@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Sparkles, Pencil, Trash2 } from 'lucide-react'
 import { api } from '@renderer/lib/api'
 import { useAppStore } from '@renderer/store/useAppStore'
@@ -11,6 +11,32 @@ import { Label } from '@renderer/components/ui/label'
 import { PersonaForm } from './PersonaForm'
 import { useT } from '@renderer/i18n/useT'
 
+interface GenerationFormState {
+  audience: string
+  market: string
+  productContext: string
+  researchGoal: string
+  mustInclude: string
+  mustAvoid: string
+  diversityAxes: string
+  tone: string
+  notes: string
+  count: number
+}
+
+const DEFAULT_GENERATION_FORM: GenerationFormState = {
+  audience: '',
+  market: '',
+  productContext: '',
+  researchGoal: '',
+  mustInclude: '',
+  mustAvoid: '',
+  diversityAxes: '',
+  tone: 'profesional, especifico y accionable',
+  notes: '',
+  count: 5
+}
+
 export function GenerateWithAiDialog({
   workspaceId,
   panelId,
@@ -22,17 +48,18 @@ export function GenerateWithAiDialog({
 }) {
   const provider = useAppStore((s) => s.currentProvider)
   const model = useAppStore((s) => s.currentModel)
+  const storageKey = useMemo(() => `crowdmind.personaGenerationForm.${workspaceId}.${panelId}`, [workspaceId, panelId])
   const [open, setOpen] = useState(false)
-  const [audience, setAudience] = useState('')
-  const [market, setMarket] = useState('')
-  const [productContext, setProductContext] = useState('')
-  const [researchGoal, setResearchGoal] = useState('')
-  const [mustInclude, setMustInclude] = useState('')
-  const [mustAvoid, setMustAvoid] = useState('')
-  const [diversityAxes, setDiversityAxes] = useState('')
-  const [tone, setTone] = useState('profesional, especifico y accionable')
-  const [notes, setNotes] = useState('')
-  const [count, setCount] = useState(5)
+  const [audience, setAudience] = useState(DEFAULT_GENERATION_FORM.audience)
+  const [market, setMarket] = useState(DEFAULT_GENERATION_FORM.market)
+  const [productContext, setProductContext] = useState(DEFAULT_GENERATION_FORM.productContext)
+  const [researchGoal, setResearchGoal] = useState(DEFAULT_GENERATION_FORM.researchGoal)
+  const [mustInclude, setMustInclude] = useState(DEFAULT_GENERATION_FORM.mustInclude)
+  const [mustAvoid, setMustAvoid] = useState(DEFAULT_GENERATION_FORM.mustAvoid)
+  const [diversityAxes, setDiversityAxes] = useState(DEFAULT_GENERATION_FORM.diversityAxes)
+  const [tone, setTone] = useState(DEFAULT_GENERATION_FORM.tone)
+  const [notes, setNotes] = useState(DEFAULT_GENERATION_FORM.notes)
+  const [count, setCount] = useState(DEFAULT_GENERATION_FORM.count)
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [preview, setPreview] = useState<PersonaDraft[] | null>(null)
@@ -40,6 +67,40 @@ export function GenerateWithAiDialog({
   const [error, setError] = useState<string | null>(null)
   const t = useT()
   const canGenerate = audience.trim().length > 0 || productContext.trim().length > 0 || researchGoal.trim().length > 0
+
+  function currentFormState(): GenerationFormState {
+    return { audience, market, productContext, researchGoal, mustInclude, mustAvoid, diversityAxes, tone, notes, count }
+  }
+
+  function applyFormState(state: Partial<GenerationFormState>) {
+    setAudience(state.audience ?? DEFAULT_GENERATION_FORM.audience)
+    setMarket(state.market ?? DEFAULT_GENERATION_FORM.market)
+    setProductContext(state.productContext ?? DEFAULT_GENERATION_FORM.productContext)
+    setResearchGoal(state.researchGoal ?? DEFAULT_GENERATION_FORM.researchGoal)
+    setMustInclude(state.mustInclude ?? DEFAULT_GENERATION_FORM.mustInclude)
+    setMustAvoid(state.mustAvoid ?? DEFAULT_GENERATION_FORM.mustAvoid)
+    setDiversityAxes(state.diversityAxes ?? DEFAULT_GENERATION_FORM.diversityAxes)
+    setTone(state.tone ?? DEFAULT_GENERATION_FORM.tone)
+    setNotes(state.notes ?? DEFAULT_GENERATION_FORM.notes)
+    setCount(Math.min(30, Math.max(1, Number(state.count ?? DEFAULT_GENERATION_FORM.count) || DEFAULT_GENERATION_FORM.count)))
+  }
+
+  useEffect(() => {
+    if (!open) return
+    try {
+      const saved = localStorage.getItem(storageKey)
+      if (saved) applyFormState(JSON.parse(saved) as Partial<GenerationFormState>)
+    } catch {
+      // Ignore corrupted local form cache; the user can continue with defaults.
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, storageKey])
+
+  useEffect(() => {
+    if (!open || preview) return
+    localStorage.setItem(storageKey, JSON.stringify(currentFormState()))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, storageKey, audience, market, productContext, researchGoal, mustInclude, mustAvoid, diversityAxes, tone, notes, count, preview])
 
   function distribution(key: 'nivelIngreso' | 'disposicionBase' | 'pais' | 'genero') {
     const counts = new Map<string, number>()
@@ -84,15 +145,6 @@ export function GenerateWithAiDialog({
       await api.personas.saveBulk(panelId, preview)
       setOpen(false)
       setPreview(null)
-      setAudience('')
-      setMarket('')
-      setProductContext('')
-      setResearchGoal('')
-      setMustInclude('')
-      setMustAvoid('')
-      setDiversityAxes('')
-      setTone('profesional, especifico y accionable')
-      setNotes('')
       onSaved()
     } finally {
       setSaving(false)

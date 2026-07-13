@@ -39,7 +39,7 @@ Each persona must include:
   "rasgos": ["pragmatica", "analitica"],
   "valores": ["eficiencia", "confianza"],
   "historiaPersonal": "Two to four concrete sentences with context, habits and decision drivers.",
-  "objecionesTipicas": ["precio", "falta de prueba social"],
+  "objecionesTipicas": ["price", "lack of social proof"],
   "canalPreferido": "WhatsApp",
   "llmProviderOverride": null,
   "llmModelOverride": null
